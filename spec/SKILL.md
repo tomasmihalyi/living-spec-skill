@@ -1,3 +1,12 @@
+---
+name: spec
+description: Living Specifications for Claude Code - consolidate development artifacts into AI-maintainable spec files with AI-DLC principles. Use for project planning, requirements, architecture, drift detection, and role-based views.
+argument-hint: "[command] or [feature description]"
+disable-model-invocation: false
+user-invocable: true
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, TodoWrite
+---
+
 # /spec - Living Specifications for Claude Code
 
 Consolidate development artifacts into single, AI-maintainable specification files with AI-DLC principles.
@@ -41,25 +50,25 @@ Your choice (A/B/C):
 
 ## Steering Files
 
-Load these contextually based on workflow phase:
+Load these contextually based on workflow phase (located at `~/.claude/skills/steering/`):
 
 | File | When to Load |
 |------|--------------|
-| `steering/workflow.md` | Always - core workflow logic |
-| `steering/template.md` | When creating new Living Spec |
-| `steering/maintenance.md` | When updating specs |
-| `steering/drift-detection.md` | On `/spec drift` or after code changes |
-| `steering/traceability.md` | On traceability questions, QA review |
-| `steering/decisions.md` | When choosing approaches |
+| `~/.claude/skills/steering/workflow.md` | Always - core workflow logic |
+| `~/.claude/skills/steering/template.md` | When creating new Living Spec |
+| `~/.claude/skills/steering/maintenance.md` | When updating specs |
+| `~/.claude/skills/steering/drift-detection.md` | On `/spec drift` or after code changes |
+| `~/.claude/skills/steering/traceability.md` | On traceability questions, QA review |
+| `~/.claude/skills/steering/decisions.md` | When choosing approaches |
 
 ### Role-Based Views (load on `/spec view <role>`)
 
 | File | Triggers |
 |------|----------|
-| `steering/views/developer.md` | "as developer", "my tasks", "what to work on" |
-| `steering/views/manager.md` | "as manager", "project status", "timeline" |
-| `steering/views/qa.md` | "as QA", "test coverage", "quality" |
-| `steering/views/architect.md` | "as architect", "design decisions", "architecture" |
+| `~/.claude/skills/steering/views/developer.md` | "as developer", "my tasks", "what to work on" |
+| `~/.claude/skills/steering/views/manager.md` | "as manager", "project status", "timeline" |
+| `~/.claude/skills/steering/views/qa.md` | "as QA", "test coverage", "quality" |
+| `~/.claude/skills/steering/views/architect.md` | "as architect", "design decisions", "architecture" |
 
 ## AI-DLC Phases
 

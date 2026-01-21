@@ -13,20 +13,45 @@ Bring spec-driven development with AI-DLC principles to Claude Code. Equivalent 
 
 ## Installation
 
-### One-liner
+### One-liner (Recommended)
+
 ```bash
-mkdir -p ~/.claude/skills && cp -r living-spec-skill/* ~/.claude/skills/
+mkdir -p ~/.claude/skills && \
+  git clone https://github.com/tomasmihalyi/living-spec-skill.git /tmp/living-spec-skill && \
+  cp -r /tmp/living-spec-skill/spec /tmp/living-spec-skill/steering ~/.claude/skills/ && \
+  rm -rf /tmp/living-spec-skill
 ```
 
-### Manual
-1. Copy `spec.md` to `~/.claude/skills/spec.md`
-2. Copy `steering/` folder to `~/.claude/skills/steering/`
+### Manual Installation
 
-### Verify
+1. Create the skills directory:
+   ```bash
+   mkdir -p ~/.claude/skills
+   ```
+
+2. Copy the `spec/` directory (contains `SKILL.md`):
+   ```bash
+   cp -r spec ~/.claude/skills/
+   ```
+
+3. Copy the `steering/` directory:
+   ```bash
+   cp -r steering ~/.claude/skills/
+   ```
+
+### Verify Installation
+
 ```bash
 ls ~/.claude/skills/
-# Should show: spec.md, steering/
+# Should show: spec/  steering/
+
+ls ~/.claude/skills/spec/
+# Should show: SKILL.md
 ```
+
+### Restart Claude Code
+
+After installation, restart Claude Code for the skill to be discovered.
 
 ## Usage
 
@@ -198,8 +223,9 @@ Claude: [Analyzes codebase...]
 
 ```
 living-spec-skill/
-├── spec.md                          # Main skill entry point
 ├── README.md                        # This file
+├── spec/
+│   └── SKILL.md                     # Main skill entry point (with YAML frontmatter)
 └── steering/
     ├── workflow.md                  # Core workflow logic
     ├── template.md                  # Living Spec template
@@ -225,7 +251,9 @@ living-spec-skill/
 ## Troubleshooting
 
 **Skill not loading:**
-- Verify files are in `~/.claude/skills/`
+- Verify `~/.claude/skills/spec/SKILL.md` exists
+- Check that YAML frontmatter is at the top of SKILL.md
+- Restart Claude Code after installation
 - Check file permissions
 
 **Drift score always 0:**
@@ -235,6 +263,17 @@ living-spec-skill/
 **Phase gate blocked:**
 - Check exit criteria in spec
 - All items must be checked before transition
+
+## Updating
+
+To update to the latest version:
+
+```bash
+rm -rf ~/.claude/skills/spec ~/.claude/skills/steering && \
+  git clone https://github.com/tomasmihalyi/living-spec-skill.git /tmp/living-spec-skill && \
+  cp -r /tmp/living-spec-skill/spec /tmp/living-spec-skill/steering ~/.claude/skills/ && \
+  rm -rf /tmp/living-spec-skill
+```
 
 ## License
 
