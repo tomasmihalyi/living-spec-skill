@@ -1,13 +1,25 @@
-# Maintenance Steering Template
+# Spec Steering Template
 
-Create this file at `.specs/maintenance.md` when setting up a project with Living Specs.
+Create this file at `.claude/spec-steering.md` when setting up a project with Living Specs.
+
+**IMPORTANT:** After creating this file, add the following to the project's `CLAUDE.md`:
+
+```markdown
+## Living Spec Integration
+
+This project uses Living Specifications. At every session:
+1. Read `.claude/spec-steering.md` for maintenance rules
+2. Check `.specs/00-[PROJECT].living.md` for current state
+3. Calculate drift score if code changes detected
+4. Offer spec updates after completing work
+```
 
 ---
 
 ```markdown
-# Living Spec Maintenance
+# Living Spec Steering
 
-> This file guides AI assistants in maintaining the Living Spec. Always loaded with the spec.
+> This file is auto-loaded via CLAUDE.md to guide AI assistants in maintaining the Living Spec.
 
 ## Source of Truth
 
@@ -17,12 +29,11 @@ The Living Spec at `.specs/00-[PROJECT_NAME].living.md` is the **single source o
 
 ## Session Start Protocol
 
-When starting a new session in this project:
-
-1. **Read the Living Spec** at `.specs/00-[PROJECT_NAME].living.md`
-2. **Check Current Status** section for next action
-3. **Calculate drift score** if code changes detected
-4. **Present welcome back** message with options
+WHEN starting a new session in this project:
+1. THE system SHALL read the Living Spec at `.specs/00-[PROJECT_NAME].living.md`
+2. THE system SHALL check Current Status section for next action
+3. THE system SHALL calculate drift score if code changes detected
+4. THE system SHALL present welcome back message with options
 
 ## When to Update the Living Spec
 
@@ -66,7 +77,7 @@ When starting a new session in this project:
 
 ## After Completing Work
 
-Always ask:
+WHEN any code change is completed THE system SHALL ask:
 ```
 Work completed. Should I update the Living Spec?
 
@@ -80,7 +91,7 @@ Updates needed:
 
 ## Drift Detection
 
-After ANY code changes to files in Component Map:
+WHEN any code changes occur to files in Component Map THE system SHALL:
 
 1. Calculate drift score:
    ```
@@ -98,7 +109,7 @@ After ANY code changes to files in Component Map:
 
 ## Phase Transitions
 
-**Never auto-transition phases.** Always:
+**Never auto-transition phases.** THE system SHALL always:
 
 1. Verify all exit criteria met
 2. Present summary to user
@@ -116,10 +127,7 @@ Living Spec (orchestrates at phase level)
     └── feature-dashboard/ (🟡 Operating)
 ```
 
-Update hierarchy when:
-- New feature spec created
-- Feature spec phase changes
-- Feature spec completed/archived
+WHEN feature spec status changes THE system SHALL update the Living Spec hierarchy.
 
 ## Current Project State
 

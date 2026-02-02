@@ -54,20 +54,36 @@ B) Brownfield - Existing code to document
 ### Step 4: Setup Based on Type
 
 **Greenfield:**
-1. Create `.specs/maintenance.md` using maintenance template
-2. Create `.specs/00-[project].living.md` using template
-3. Set `Project Type: Greenfield`
-4. Skip Project Context section
-5. Begin Planning phase
+1. Create `.claude/spec-steering.md` using maintenance template
+2. Update `CLAUDE.md` to reference spec-steering (for auto-loading)
+3. Create `.specs/00-[project].living.md` using template
+4. Set `Project Type: Greenfield`
+5. Skip Project Context section
+6. Begin Planning phase
 
 **Brownfield:**
 1. Run codebase analysis (see below)
-2. Create `.specs/maintenance.md` using maintenance template
-3. Create `.specs/00-[project].living.md` using template
-4. Set `Project Type: Brownfield`
-5. Auto-populate Project Context from analysis
-6. Present findings for validation
-7. Begin Planning phase after user confirms
+2. Create `.claude/spec-steering.md` using maintenance template
+3. Update `CLAUDE.md` to reference spec-steering (for auto-loading)
+4. Create `.specs/00-[project].living.md` using template
+5. Set `Project Type: Brownfield`
+6. Auto-populate Project Context from analysis
+7. Present findings for validation
+8. Begin Planning phase after user confirms
+
+### CLAUDE.md Integration
+
+After creating spec-steering.md, add to project's CLAUDE.md:
+
+```markdown
+## Living Spec Integration
+
+This project uses Living Specifications. At every session:
+1. Read `.claude/spec-steering.md` for maintenance rules
+2. Check `.specs/00-[PROJECT].living.md` for current state
+3. Calculate drift score if code changes detected
+4. Offer spec updates after completing work
+```
 
 ## Brownfield Reverse Engineering
 
@@ -361,6 +377,57 @@ Adjust depth based on project size:
 | Moderate (1-2 months) | 5-10 questions | 3-5 | 5-10 | 4-6 |
 | Complex (3+ months) | 10+ questions | 5+ | Multi-phase | 6+ |
 
+## Creating Feature Specs (Option B)
+
+When creating a feature spec, use EARS format with three files:
+
+### Step 1: Create Directory
+```
+.specs/feature-[name]/
+├── requirements.md     # EARS requirements
+├── design.md           # Architecture decisions
+└── tasks.md            # Implementation tracking
+```
+
+### Step 2: Write Requirements (EARS Format)
+
+Use these templates for requirements.md:
+
+| Type | Template |
+|------|----------|
+| Ubiquitous | THE `<system>` SHALL `<response>` |
+| Event-Driven | WHEN `<trigger>` THE `<system>` SHALL `<response>` |
+| State-Driven | WHILE `<state>` THE `<system>` SHALL `<response>` |
+| Unwanted | IF `<condition>` THEN THE `<system>` SHALL `<response>` |
+| Optional | WHERE `<feature>` THE `<system>` SHALL `<response>` |
+
+### Step 3: Document Design
+
+In design.md:
+- Architecture overview (ASCII diagram)
+- Key decisions with rationale
+- Data model / schema
+- API design
+- Integration points
+
+### Step 4: Track Tasks
+
+In tasks.md:
+- Implementation tasks with dependencies
+- Files to create/modify/delete
+- Test cases linked to requirements
+- Progress tracking
+
+### Step 5: Link in Living Spec
+
+Update "Related Feature Specs" section in the Living Spec:
+
+```markdown
+| Feature | Path | Phase | Owner | Description |
+|---------|------|-------|-------|-------------|
+| [Name] | `.specs/feature-[name]/` | 🔵 | @owner | [Description] |
+```
+
 ## Anti-Patterns to Avoid
 
 - ❌ Skipping approach selection on first use
@@ -371,3 +438,5 @@ Adjust depth based on project size:
 - ❌ Duplicating task tracking (use TodoWrite, reference in spec)
 - ❌ Creating feature specs without Living Spec orchestration (Option B)
 - ❌ Ignoring drift score warnings
+- ❌ Using free-form requirements instead of EARS format
+- ❌ Creating single-file feature specs instead of requirements/design/tasks split

@@ -37,7 +37,7 @@ A) LIVING SPEC ONLY
 
 B) LIVING SPEC + FEATURE SPECS
    Best for: Multiple features, growing projects
-   Creates: Living Spec orchestrates individual feature specs
+   Creates: Living Spec orchestrates individual feature specs (EARS format)
 
 C) FEATURE SPECS ONLY
    Best for: Clear feature boundaries, simple projects
@@ -56,10 +56,11 @@ Load these contextually based on workflow phase (located at `~/.claude/skills/st
 |------|--------------|
 | `~/.claude/skills/steering/workflow.md` | Always - core workflow logic |
 | `~/.claude/skills/steering/template.md` | When creating new Living Spec |
-| `~/.claude/skills/steering/maintenance.md` | When updating specs |
+| `~/.claude/skills/steering/maintenance.md` | Template for project steering file |
 | `~/.claude/skills/steering/drift-detection.md` | On `/spec drift` or after code changes |
 | `~/.claude/skills/steering/traceability.md` | On traceability questions, QA review |
 | `~/.claude/skills/steering/decisions.md` | When choosing approaches |
+| `~/.claude/skills/steering/ears-template.md` | When creating feature specs (Option B) |
 
 ### Role-Based Views (load on `/spec view <role>`)
 
@@ -69,6 +70,15 @@ Load these contextually based on workflow phase (located at `~/.claude/skills/st
 | `~/.claude/skills/steering/views/manager.md` | "as manager", "project status", "timeline" |
 | `~/.claude/skills/steering/views/qa.md` | "as QA", "test coverage", "quality" |
 | `~/.claude/skills/steering/views/architect.md` | "as architect", "design decisions", "architecture" |
+
+## Auto-Loading via .claude/
+
+**IMPORTANT:** When setting up a project, create `.claude/spec-steering.md` which will be auto-loaded on every session via CLAUDE.md integration.
+
+This enables:
+- Automatic drift detection on session start
+- Spec update prompts after code changes
+- Session continuity without explicit `/spec` invocation
 
 ## AI-DLC Phases
 
@@ -87,16 +97,31 @@ Load these contextually based on workflow phase (located at `~/.claude/skills/st
 ## Directory Structure
 
 ```
-.specs/
-├── 00-project.living.md        # Main orchestrator (sorts first)
-├── maintenance.md              # Maintenance steering (always loaded)
-├── feature-auth/               # Feature spec (Option B)
-│   ├── requirements.md
-│   ├── design.md
-│   └── tasks.md
-└── feature-export/             # Another feature spec
-    └── ...
+project/
+├── .claude/
+│   └── spec-steering.md        # Auto-loaded steering (via CLAUDE.md)
+├── .specs/
+│   ├── 00-project.living.md    # Main orchestrator (sorts first)
+│   ├── feature-auth/           # Feature spec (Option B) - EARS format
+│   │   ├── requirements.md     # EARS requirements
+│   │   ├── design.md           # Architecture decisions
+│   │   └── tasks.md            # Implementation tasks
+│   └── feature-export/         # Another feature spec
+│       └── ...
+└── CLAUDE.md                   # Add spec-steering integration
 ```
+
+## EARS Format (Feature Specs)
+
+Feature specs use EARS (Easy Approach to Requirements Syntax) format:
+
+| Type | Template | When to Use |
+|------|----------|-------------|
+| Ubiquitous | THE `<system>` SHALL `<response>` | Always-on behavior |
+| Event-Driven | WHEN `<trigger>` THE `<system>` SHALL `<response>` | Triggered by events |
+| State-Driven | WHILE `<state>` THE `<system>` SHALL `<response>` | State-dependent |
+| Unwanted | IF `<condition>` THEN THE `<system>` SHALL `<response>` | Error handling |
+| Optional | WHERE `<feature>` THE `<system>` SHALL `<response>` | Feature flags |
 
 ## Status Icons
 
@@ -113,10 +138,18 @@ Load these contextually based on workflow phase (located at `~/.claude/skills/st
 
 ### Creating Living Spec (Options A/B)
 1. Ask user for approach (A/B/C)
-2. Create `.specs/maintenance.md` from maintenance template
-3. Create `.specs/00-project.living.md` from template
-4. For brownfield: Run codebase analysis first
-5. Begin Planning phase
+2. Create `.claude/spec-steering.md` from maintenance template
+3. Update `CLAUDE.md` to reference spec-steering
+4. Create `.specs/00-project.living.md` from template
+5. For brownfield: Run codebase analysis first
+6. Begin Planning phase
+
+### Creating Feature Spec (Option B)
+1. Create `.specs/feature-[name]/` directory
+2. Create `requirements.md` using EARS template
+3. Create `design.md` for architecture decisions
+4. Create `tasks.md` for implementation tracking
+5. Link in Living Spec's "Related Feature Specs" section
 
 ### Session Continuity
 When returning to existing project with Living Spec:
@@ -156,3 +189,5 @@ Ready to proceed to 🟢 Building? (yes/no)
 6. **Calculate drift** after code changes to mapped files
 7. **Offer spec update** after completing any work
 8. **Use TodoWrite** to track tasks from the Execution Plan
+9. **Use EARS format** for all feature spec requirements
+10. **Create .claude/spec-steering.md** for auto-loading
