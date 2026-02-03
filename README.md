@@ -1,15 +1,60 @@
 # Living Spec Skill for Claude Code
 
-Bring spec-driven development with AI-DLC principles to Claude Code. Equivalent to Kiro's Living Spec Power.
+> **v2.0 - Multi-Agent Architecture**
+
+Bring spec-driven development with AI-DLC principles to Claude Code. Features **11 specialized subagents** for parallel analysis and domain expertise.
 
 ## What It Does
 
+- **Multi-Agent Orchestration** - Parallel subagents for 10x faster analysis
 - **Single source of truth** for project intent, requirements, architecture, and progress
 - **AI-DLC phases**: 🔵 Planning → 🟢 Building → 🟡 Operating
+- **Comprehension Gates** - Prevent skill atrophy with verification questions
+- **EARS Format** - Structured, testable requirements syntax
 - **Drift detection** keeps spec and code in sync
-- **Traceability** from requirements through design, tasks, and tests
+- **Tiered Approval System** - Right gates at the right places
 - **Role-based views** for developers, managers, QA, and architects
-- **Brownfield support** with codebase reverse engineering
+- **Brownfield support** with parallel codebase reverse engineering
+
+## Multi-Agent Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    /spec ORCHESTRATOR                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  PLANNING PHASE (Parallel)           BUILDING PHASE (Parallel)  │
+│  ┌─────────────────────────┐         ┌─────────────────────────┐│
+│  │ requirements-analyst    │         │ database-specialist     ││
+│  │ architecture-reviewer   │         │ api-specialist          ││
+│  │ risk-assessor           │         │ frontend-specialist     ││
+│  └─────────────────────────┘         │ security-specialist     ││
+│                                      │ test-specialist         ││
+│                                      └─────────────────────────┘│
+│                                                                  │
+│  QUALITY GATES                       MAINTENANCE                 │
+│  ┌─────────────────────────┐         ┌─────────────────────────┐│
+│  │ spec-critic             │         │ spec-updater            ││
+│  │ comprehension-gate      │         │ (autonomous updates)    ││
+│  └─────────────────────────┘         └─────────────────────────┘│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 11 Specialized Agents
+
+| Agent | Purpose | Phase |
+|-------|---------|-------|
+| `requirements-analyst` | Extract FR/NFR in EARS format | Planning |
+| `architecture-reviewer` | Analyze design patterns | Planning |
+| `risk-assessor` | Security, performance, debt | Planning |
+| `database-specialist` | Schema, queries, migrations | Building |
+| `api-specialist` | Endpoints, contracts, errors | Building |
+| `frontend-specialist` | Components, state, UX | Building |
+| `security-specialist` | Auth, validation, threats | Building |
+| `test-specialist` | Test strategy, coverage | Building |
+| `spec-critic` | Review alignment, find gaps | All |
+| `comprehension-gate` | Verify developer understanding | Transitions |
+| `spec-updater` | Maintain spec documents | Continuous |
 
 ## Installation
 
@@ -18,7 +63,7 @@ Bring spec-driven development with AI-DLC principles to Claude Code. Equivalent 
 ```bash
 mkdir -p ~/.claude/skills && \
   git clone https://github.com/tomasmihalyi/living-spec-skill.git /tmp/living-spec-skill && \
-  cp -r /tmp/living-spec-skill/spec /tmp/living-spec-skill/steering ~/.claude/skills/ && \
+  cp -r /tmp/living-spec-skill/spec /tmp/living-spec-skill/steering /tmp/living-spec-skill/agents ~/.claude/skills/ && \
   rm -rf /tmp/living-spec-skill
 ```
 
@@ -29,24 +74,19 @@ mkdir -p ~/.claude/skills && \
    mkdir -p ~/.claude/skills
    ```
 
-2. Copy the `spec/` directory (contains `SKILL.md`):
+2. Copy all directories:
    ```bash
-   cp -r spec ~/.claude/skills/
-   ```
-
-3. Copy the `steering/` directory:
-   ```bash
-   cp -r steering ~/.claude/skills/
+   cp -r spec steering agents ~/.claude/skills/
    ```
 
 ### Verify Installation
 
 ```bash
 ls ~/.claude/skills/
-# Should show: spec/  steering/
+# Should show: agents/  spec/  steering/
 
-ls ~/.claude/skills/spec/
-# Should show: SKILL.md
+ls ~/.claude/skills/agents/
+# Should show 11 agent .md files
 ```
 
 ### Restart Claude Code
@@ -56,11 +96,8 @@ After installation, restart Claude Code for the skill to be discovered.
 ## Usage
 
 ```bash
-# Start living spec workflow (asks for approach A/B/C)
+# Start living spec workflow
 /spec
-
-# Create spec for specific feature
-/spec Add user authentication with OAuth
 
 # Check project status
 /spec status
@@ -78,14 +115,112 @@ After installation, restart Claude Code for the skill to be discovered.
 /spec view architect    # Design decisions & tech debt
 ```
 
+## Key Features
+
+### Parallel Agent Analysis
+
+When analyzing a brownfield codebase, three agents work simultaneously:
+
+```
+Spawning parallel agents...
+
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│  requirements-  │  │  architecture-  │  │  risk-          │
+│  analyst        │  │  reviewer       │  │  assessor       │
+│  (FR/NFR)       │  │  (patterns)     │  │  (threats)      │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+
+Results in ~30 seconds:
+- 23 Functional Requirements (EARS format)
+- 13 Non-Functional Requirements
+- 5 Security Risks identified
+- 6 Technical Debt items
+```
+
+### EARS Requirements Format
+
+All requirements use EARS (Easy Approach to Requirements Syntax):
+
+| Type | Template | Example |
+|------|----------|---------|
+| Ubiquitous | THE system SHALL [behavior] | THE system SHALL validate all input |
+| Event-Driven | WHEN [trigger] THE system SHALL [response] | WHEN user submits form THE system SHALL save data |
+| State-Driven | WHILE [state] THE system SHALL [behavior] | WHILE offline THE system SHALL queue requests |
+| Unwanted | IF [condition] THEN THE system SHALL [response] | IF database unavailable THEN return 503 |
+
+### Comprehension Gates
+
+Prevent skill atrophy at phase transitions:
+
+```
+📋 COMPREHENSION VERIFICATION
+
+Before proceeding to Building, please answer:
+
+1. Why did we choose DynamoDB over PostgreSQL for this architecture?
+2. If a JWT token is stolen, what's the impact and mitigation?
+3. What is a Lambda cold start and how might it affect UX?
+
+Your responses will be logged in §6 Decision Log.
+```
+
+**Why?** Research shows AI assistance can reduce skill mastery by 17% when developers rubber-stamp without understanding.
+
+### Tiered Approval System
+
+Not all changes need human approval:
+
+| Tier | Changes | Behavior |
+|------|---------|----------|
+| **Tier 1: Autonomous** | Timestamps, status icons, drift scores | Auto-updated |
+| **Tier 2: Async Notification** | Component Map, Tech Debt, Next Actions | Update + notify |
+| **Tier 3: Synchronous Approval** | Requirements, Architecture, Phase transitions | Blocks until approved |
+
+### Domain Specialist Network
+
+When creating feature specs, relevant specialists spawn in parallel:
+
+```
+Creating feature spec for DynamoDB migration...
+
+┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐
+│ database │ │ api      │ │ security │ │ test     │
+│ specialist│ │ specialist│ │ specialist│ │ specialist│
+└──────────┘ └──────────┘ └──────────┘ └──────────┘
+
+Outputs:
+├── requirements.md  ← 18 FR + 13 NFR
+├── design.md        ← Schema, API changes, CloudFormation
+└── tasks.md         ← 15 tasks, 10 test cases
+```
+
+### Drift Detection
+
+```
+📊 Drift Score: 35% ⚠️
+
+3 files changed since last spec update:
+- src/auth/login.ts
+- src/auth/logout.ts
+- src/api/users.ts
+
+Should I update the Living Spec?
+```
+
+| Score | Status | Action |
+|-------|--------|--------|
+| 0-20% | ✅ Healthy | Continue working |
+| 21-50% | ⚠️ Review | Suggest sync |
+| 51%+ | 🔴 Critical | Block until synced |
+
 ## Approaches
 
-On first use, you'll choose an approach:
+On first use, choose an approach:
 
 | Approach | Best For | Creates |
 |----------|----------|---------|
 | **A) Living Spec Only** | MVPs, small teams, rapid iteration | Single spec file |
-| **B) Living Spec + Feature Specs** | Multiple features, growing projects | Orchestrator + feature specs |
+| **B) Living Spec + Feature Specs** | Multiple features, growing projects | Orchestrator + EARS feature specs |
 | **C) Feature Specs Only** | Simple, isolated features | Individual specs |
 
 ## AI-DLC Phases
@@ -101,7 +236,7 @@ What & Why           How                   Run & Measure
                      • Metrics Setup       • Next Actions
 
      ────────────────────────────────────────────────────→
-                    Approval gates between phases
+         Approval gates + Comprehension verification
 ```
 
 ## Directory Structure
@@ -109,171 +244,180 @@ What & Why           How                   Run & Measure
 After setup, your project will have:
 
 ```
-.specs/
-├── maintenance.md              # Always-loaded steering
-├── 00-project.living.md        # Main Living Spec
-└── feature-auth/               # Feature spec (Option B)
-    ├── requirements.md
-    ├── design.md
-    └── tasks.md
+project/
+├── .claude/
+│   └── spec-steering.md              # Auto-loaded every session
+├── .specs/
+│   ├── 00-project.living.md          # Main Living Spec
+│   └── feature-auth/                 # Feature spec (Option B)
+│       ├── requirements.md           # EARS format
+│       ├── design.md                 # Architecture decisions
+│       └── tasks.md                  # Implementation tasks
+└── CLAUDE.md                         # Project instructions
 ```
-
-## Key Features
-
-### Drift Detection
-Automatically tracks when code changes without spec updates:
-```
-📊 Drift Score: 35% ⚠️
-
-3 files changed since last spec update:
-- src/auth/login.ts
-- src/auth/logout.ts
-- src/api/users.ts
-
-Should I update the Living Spec?
-```
-
-### Requirements Questionnaire
-Interactive requirements gathering with blocking:
-```
-⚠️ STOP: Complete the Requirements Questionnaire before proceeding to Architecture.
-
-Q1: Authentication Method
-Options: A) JWT B) Session-based C) OAuth only
-Your Answer: _______________
-Status: ⬚ Unanswered
-```
-
-### Traceability Matrix
-Track requirements through implementation:
-```
-| Req ID | Design | Tasks | Tests | Status |
-|--------|--------|-------|-------|--------|
-| PR-001 | §3.1   | S1,S2 | T-001 | ✅     |
-| PR-002 | §3.2   | S3    | -     | ⬚      |
-```
-
-### Role-Based Views
-Context-appropriate information for each role:
-- **Developer**: Next task, component locations, relevant decisions
-- **Manager**: Progress, blockers, metrics, pending decisions
-- **QA**: Test coverage, acceptance criteria, quality gates
-- **Architect**: Design decisions, tech debt, component relationships
 
 ## Workflow Example
 
 ```
-You: /spec Build an e-commerce checkout flow
+You: /spec
 
 Claude: Which approach fits your project?
         A) Living Spec Only
         B) Living Spec + Feature Specs
         C) Feature Specs Only
 
-You: A
-
-Claude: Is this a new project or existing codebase?
-        A) Greenfield
-        B) Brownfield
-
 You: B
 
-Claude: [Analyzes codebase...]
+Claude: Is this greenfield or brownfield?
 
-        Codebase Analysis Complete:
-        - Architecture: Next.js App Router
-        - Database: PostgreSQL with Prisma
-        - Existing components: 47 found
+You: B (brownfield)
+
+Claude: Spawning parallel analysis agents...
+
+        ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+        │ requirements    │ │ architecture    │ │ risk            │
+        │ analyst         │ │ reviewer        │ │ assessor        │
+        └─────────────────┘ └─────────────────┘ └─────────────────┘
+
+        Analysis Complete:
+        - Architecture: React + Express + SQLite
+        - Requirements: 23 FR, 13 NFR extracted
+        - Risks: 5 security issues identified
 
         Creating Living Spec...
 
-        [Creates .specs/00-ecommerce.living.md]
-
         Now in 🔵 Planning phase.
 
-        Let's start with the Requirements Questionnaire:
+        Requirements Questionnaire:
 
-        Q1: Payment Provider
-        Which payment provider will you use?
-        A) Stripe
-        B) PayPal
-        C) Both
-        D) Other
+        Q1: Authentication Strategy
+        A) No auth  B) Basic auth  C) OAuth  D) Defer
 
-        Your answer:
+You: B
+
+Claude: Q2: Database
+        A) Keep SQLite  B) PostgreSQL  C) DynamoDB
+
+You: C
+
+Claude: Architecture decisions proposed:
+        - D6: DynamoDB (serverless)
+        - D7: JWT authentication
+        - D8: Lambda deployment
+
+        📋 COMPREHENSION VERIFICATION
+
+        Before approving, please answer:
+        1. Why DynamoDB over PostgreSQL?
+        2. What if a JWT token is stolen?
+
+You: [answers questions]
+
+Claude: ✅ Approved. Entering 🟢 Building phase.
+
+        Ready to create feature specs with domain specialists.
 ```
-
-## Comparison to Kiro Living Spec Power
-
-| Feature | Kiro | This Skill |
-|---------|------|------------|
-| AI-DLC phases | ✅ | ✅ |
-| Approach selection (A/B/C) | ✅ | ✅ |
-| Requirements questionnaire | ✅ | ✅ |
-| Drift detection | ✅ | ✅ |
-| Traceability matrix | ✅ | ✅ |
-| Role-based views | ✅ | ✅ |
-| Brownfield reverse engineering | ✅ | ✅ |
-| Approval gates | ✅ | ✅ |
-| Session continuity | ✅ | ✅ |
-| Visual UI | Native IDE | Terminal/Markdown |
-| Installation | Built-in | Copy files |
 
 ## File Reference
 
 ```
 living-spec-skill/
-├── README.md                        # This file
+├── README.md
 ├── spec/
-│   └── SKILL.md                     # Main skill entry point (with YAML frontmatter)
-└── steering/
-    ├── workflow.md                  # Core workflow logic
-    ├── template.md                  # Living Spec template
-    ├── maintenance.md               # Maintenance steering template
-    ├── drift-detection.md           # Drift detection logic
-    ├── traceability.md              # Traceability management
-    ├── decisions.md                 # Approach selection guide
+│   └── SKILL.md                      # Main skill (with YAML frontmatter)
+├── agents/                           # 11 specialized subagents
+│   ├── requirements-analyst.md
+│   ├── architecture-reviewer.md
+│   ├── risk-assessor.md
+│   ├── database-specialist.md
+│   ├── api-specialist.md
+│   ├── frontend-specialist.md
+│   ├── security-specialist.md
+│   ├── test-specialist.md
+│   ├── spec-critic.md
+│   ├── comprehension-gate.md
+│   └── spec-updater.md
+└── steering/                         # Workflow steering files
+    ├── workflow.md                   # Core workflow + parallel orchestration
+    ├── template.md                   # Living Spec template
+    ├── maintenance.md                # Maintenance + tiered approvals
+    ├── drift-detection.md            # Drift detection logic
+    ├── traceability.md               # Traceability management
+    ├── decisions.md                  # Approach selection
+    ├── ears-template.md              # EARS feature spec template
+    ├── hooks-template.md             # Claude Code hooks config
     └── views/
-        ├── developer.md             # Developer role view
-        ├── manager.md               # Manager role view
-        ├── qa.md                    # QA role view
-        └── architect.md             # Architect role view
+        ├── developer.md
+        ├── manager.md
+        ├── qa.md
+        └── architect.md
 ```
+
+## Customization
+
+### Modify Agents
+
+Edit agent prompts in `~/.claude/skills/agents/*.md`:
+
+```markdown
+---
+name: my-custom-specialist
+description: Use this agent when...
+color: cyan
+tools: ["Read", "Grep", "Glob"]
+---
+
+You are a specialist in [domain]...
+```
+
+### Add New Agents
+
+Create new `.md` files in `~/.claude/skills/agents/` following the same format.
+
+### Configure Hooks
+
+Copy `steering/hooks-template.md` to your project's `.claude/hooks/hooks.json` for automated drift detection.
 
 ## Tips
 
 1. **Start every session** with `/spec status` to see where you left off
-2. **Run `/spec drift`** before starting new work to ensure spec is current
-3. **Use role views** to get context-appropriate information
-4. **Don't skip questionnaire** - it ensures requirements are captured
+2. **Run `/spec drift`** before starting new work
+3. **Answer comprehension questions thoughtfully** - they ensure you understand the system
+4. **Use domain specialists** for feature specs - they provide expert-level analysis
 5. **Update spec immediately** after completing tasks to minimize drift
 
 ## Troubleshooting
 
 **Skill not loading:**
 - Verify `~/.claude/skills/spec/SKILL.md` exists
-- Check that YAML frontmatter is at the top of SKILL.md
+- Check that agents directory exists: `ls ~/.claude/skills/agents/`
 - Restart Claude Code after installation
-- Check file permissions
 
-**Drift score always 0:**
-- Ensure Component Map in spec lists your source files
-- Timestamps need to be accurate
+**Agents not spawning:**
+- Ensure Task tool is available in your Claude Code version
+- Check agent files have valid YAML frontmatter
 
-**Phase gate blocked:**
-- Check exit criteria in spec
-- All items must be checked before transition
+**Comprehension gate blocking:**
+- Answer the questions to proceed
+- Responses are logged in Decision Log for audit
 
 ## Updating
 
 To update to the latest version:
 
 ```bash
-rm -rf ~/.claude/skills/spec ~/.claude/skills/steering && \
+rm -rf ~/.claude/skills/spec ~/.claude/skills/steering ~/.claude/skills/agents && \
   git clone https://github.com/tomasmihalyi/living-spec-skill.git /tmp/living-spec-skill && \
-  cp -r /tmp/living-spec-skill/spec /tmp/living-spec-skill/steering ~/.claude/skills/ && \
+  cp -r /tmp/living-spec-skill/spec /tmp/living-spec-skill/steering /tmp/living-spec-skill/agents ~/.claude/skills/ && \
   rm -rf /tmp/living-spec-skill
 ```
+
+## Version History
+
+| Version | Changes |
+|---------|---------|
+| v2.0 | Multi-agent architecture, 11 specialists, comprehension gates, tiered approvals |
+| v1.0 | Initial release with AI-DLC phases, drift detection, role views |
 
 ## License
 
