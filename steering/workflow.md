@@ -6,6 +6,36 @@
 - User mentions "living spec", "create spec", "project documentation"
 - User starts new project and asks for planning help
 
+## Multi-Agent Orchestration
+
+Living Spec leverages specialized subagents for parallel analysis and domain expertise.
+
+### Available Agents (in `~/.claude/skills/agents/`)
+
+| Agent | Purpose | Phase |
+|-------|---------|-------|
+| `requirements-analyst` | Extract FR/NFR in EARS format | Planning |
+| `architecture-reviewer` | Analyze design patterns | Planning |
+| `risk-assessor` | Security, performance, debt | Planning |
+| `database-specialist` | Schema, queries, migrations | Building |
+| `api-specialist` | Endpoints, contracts, errors | Building |
+| `frontend-specialist` | Components, state, UX | Building |
+| `security-specialist` | Auth, validation, threats | Building |
+| `test-specialist` | Test strategy, coverage | Building |
+| `spec-critic` | Review alignment, find gaps | All phases |
+| `comprehension-gate` | Verify understanding | Transitions |
+| `spec-updater` | Maintain spec documents | After changes |
+
+### Spawning Agents
+
+Use the Task tool to spawn agents. Example:
+```
+Task tool with:
+- subagent_type: "general-purpose"
+- prompt: Load agent instructions from ~/.claude/skills/agents/[agent-name].md and execute
+- description: "[agent-name] analysis"
+```
+
 ## First-Time Flow
 
 ### Step 1: Present Options (BLOCKING)
@@ -160,15 +190,49 @@ Proceed? (yes/no)
 
 **Purpose:** Define WHAT we're building and WHY
 
+**Parallel Agent Orchestration:**
+
+WHEN entering Planning phase, spawn these agents IN PARALLEL:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     PLANNING ORCHESTRATOR                        │
+├─────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
+│  │  requirements-  │  │  architecture-  │  │  risk-          │ │
+│  │  analyst        │  │  reviewer       │  │  assessor       │ │
+│  │  (FR/NFR)       │  │  (patterns)     │  │  (threats)      │ │
+│  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘ │
+│           │                    │                    │           │
+│           └────────────────────┼────────────────────┘           │
+│                                │                                │
+│                    ┌───────────▼───────────┐                   │
+│                    │  Synthesize into      │                   │
+│                    │  Living Spec §1-§3    │                   │
+│                    └───────────────────────┘                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 **Steps:**
-1. Fill Intent section:
+
+1. **Parallel Analysis (spawn simultaneously):**
+   - `requirements-analyst`: Extract functional and non-functional requirements
+   - `architecture-reviewer`: Identify patterns, layers, constraints
+   - `risk-assessor`: Security, performance, technical debt analysis
+
+2. **Synthesize Results:**
+   - Combine agent outputs into Intent section
+   - Merge requirements into §2 (EARS format)
+   - Consolidate architecture findings into §3
+
+3. Fill Intent section:
    - Problem Statement (required)
    - Hypothesis (optional for MVPs)
    - Success Criteria (required)
    - Failure Triggers (recommended)
    - Scope boundaries (required)
 
-2. Generate Requirements Questionnaire:
+4. Generate Requirements Questionnaire:
    - Create 3-10 questions based on project complexity
    - Each question must have:
      - Clear question text
@@ -176,14 +240,14 @@ Proceed? (yes/no)
      - Answer field
      - Status (⬚/✅)
 
-3. **BLOCK until questionnaire complete:**
+5. **BLOCK until questionnaire complete:**
    ```
    ⚠️ STOP: Complete the Requirements Questionnaire before proceeding to Architecture.
 
    Questions remaining: [X]
    ```
 
-4. Document Architecture decisions:
+6. Document Architecture decisions:
    - Each decision needs:
      - Timestamp (ISO)
      - Context (why needed)
@@ -192,7 +256,7 @@ Proceed? (yes/no)
      - Rationale
      - Approval status
 
-5. Get approval for architecture:
+7. Get approval for architecture:
    ```
    Architecture decisions documented:
    1. [Decision 1] - [Choice]
@@ -205,52 +269,115 @@ Proceed? (yes/no)
 - [ ] Intent section complete
 - [ ] All questionnaire questions answered (✅)
 - [ ] Architecture decisions approved
+- [ ] Risk assessment reviewed
 
 ### 🟢 Building Phase
 
 **Purpose:** Define HOW we're building it
 
+**Domain Specialist Orchestration:**
+
+WHEN entering Building phase for a feature, spawn relevant specialists IN PARALLEL:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     BUILDING ORCHESTRATOR                        │
+├─────────────────────────────────────────────────────────────────┤
+│  Analyze feature scope to determine which specialists needed:    │
+│                                                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
+│  │ database │ │ api      │ │ frontend │ │ security │           │
+│  │ specialist│ │ specialist│ │ specialist│ │ specialist│          │
+│  │ (schema) │ │ (endpoints)│ │ (UI)     │ │ (auth)   │           │
+│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘           │
+│       │            │            │            │                   │
+│       └────────────┴─────┬──────┴────────────┘                   │
+│                          │                                       │
+│              ┌───────────▼───────────┐                          │
+│              │  Synthesize into      │                          │
+│              │  design.md            │                          │
+│              └───────────┬───────────┘                          │
+│                          │                                       │
+│              ┌───────────▼───────────┐                          │
+│              │  test-specialist      │                          │
+│              │  (test strategy)      │                          │
+│              └───────────────────────┘                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Which Specialists to Spawn:**
+
+| If Feature Has... | Spawn |
+|-------------------|-------|
+| Data model changes | `database-specialist` |
+| API endpoints | `api-specialist` |
+| UI components | `frontend-specialist` |
+| Auth/sensitive data | `security-specialist` |
+| Always | `test-specialist` (after design) |
+
 **Steps:**
-1. Create Execution Plan:
+
+1. **Parallel Domain Analysis:**
+   - Spawn relevant specialists based on feature scope
+   - Each specialist analyzes their domain
+   - Wait for all to complete
+
+2. **Synthesize Design:**
+   - Combine specialist outputs into design.md
+   - Resolve any cross-domain conflicts
+   - Document integration points
+
+3. Create Execution Plan:
    - Break into stages (3-10 based on complexity)
    - Each stage has:
      - Name
      - Goal
      - Status (⬚/🔄/✅)
 
-2. Populate Component Map:
+4. Populate Component Map:
    - List all components/modules
    - Map to file paths
    - Brief descriptions
 
-3. Set up Technical Debt Register:
-   - Carry over from analysis (brownfield)
+5. Set up Technical Debt Register:
+   - Carry over from risk-assessor analysis
    - Add new items as discovered
    - Include severity and trigger conditions
 
-4. Define Metrics:
+6. Define Metrics:
    - Business metrics with targets
    - Technical metrics (latency, error rate, etc.)
 
-5. **Use TodoWrite** to track stage execution:
+7. **Spawn test-specialist:**
+   - Generate test strategy
+   - Link tests to requirements (traceability)
+   - Define coverage targets
+
+8. **Use TodoWrite** to track stage execution:
    - Create todo item per stage
    - Mark in_progress when starting
    - Update spec status as completing
    - Mark completed when done
 
-6. After completing work, always offer:
+9. **After completing work, spawn spec-updater:**
    ```
-   Work completed. Should I update the Living Spec?
+   Work completed. Spawning spec-updater to sync Living Spec:
    - Update §4 Execution Plan status
    - Update §4 Component Map
    - Add to §6 Decision Log
    ```
+
+10. **Spawn spec-critic after implementation:**
+    - Review implementation against spec
+    - Identify gaps and missing coverage
+    - Generate comprehension questions
 
 **Exit Criteria:**
 - [ ] All stages complete (✅)
 - [ ] Tests passing
 - [ ] Component Map current
 - [ ] Metrics defined
+- [ ] Spec-critic review passed
 
 ### 🟡 Operating Phase
 
@@ -271,7 +398,27 @@ Proceed? (yes/no)
 
 ## Phase Transitions
 
-**Never auto-transition. Always require explicit approval.**
+**Never auto-transition. Always require explicit approval AND comprehension verification.**
+
+### Comprehension Gate Protocol
+
+BEFORE any phase transition:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   TRANSITION GATE PROTOCOL                       │
+├─────────────────────────────────────────────────────────────────┤
+│  1. Verify exit criteria met                                     │
+│  2. Spawn spec-critic for completeness review                   │
+│  3. Spawn comprehension-gate for verification questions         │
+│  4. Present questions to developer                              │
+│  5. BLOCK until responses logged in §6 Decision Log             │
+│  6. Only then allow transition                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Why Comprehension Gates?**
+Research shows AI assistance can reduce skill mastery by 17% when developers rubber-stamp without understanding. Comprehension gates ensure developers maintain conceptual mastery.
 
 ### Planning → Building
 
@@ -288,6 +435,30 @@ Checklist:
 ✅ Intent section complete
 ✅ Questionnaire complete
 ✅ Architecture approved
+✅ Risk assessment reviewed
+
+─────────────────────────────────────────────────────
+
+📋 COMPREHENSION VERIFICATION
+
+Before proceeding to Building, please answer these questions:
+
+1. **Requirement Understanding**
+   [Question about why a key requirement exists]
+
+   Your response: _______________
+
+2. **Architecture Reasoning**
+   [Question about why the chosen approach was selected]
+
+   Your response: _______________
+
+3. **Trade-off Analysis**
+   [Question about what we gave up with our choices]
+
+   Your response: _______________
+
+Your responses will be logged in §6 Decision Log.
 
 Ready to proceed to 🟢 Building? (yes/no)
 ```
@@ -301,13 +472,54 @@ Summary:
 - Stages: [X/Y] complete
 - Components: [Z] mapped
 - Tests: [status]
+- Spec-Critic Score: [X]%
 
 Checklist:
 ✅ All stages complete
 ✅ Tests passing
 ✅ Metrics defined
+✅ Spec-critic review passed
+
+─────────────────────────────────────────────────────
+
+📋 COMPREHENSION VERIFICATION
+
+Before deploying, please answer these questions:
+
+1. **Failure Mode Analysis**
+   [Question about what happens when X fails]
+
+   Your response: _______________
+
+2. **Edge Case Handling**
+   [Question about boundary conditions]
+
+   Your response: _______________
+
+3. **Debugging Readiness**
+   [Question about how to debug specific scenarios]
+
+   Your response: _______________
+
+Your responses will be logged in §6 Decision Log.
 
 Ready to deploy and proceed to 🟡 Operating? (yes/no)
+```
+
+### Code Review Gate
+
+For significant implementations, spawn comprehension-gate:
+
+```
+📋 IMPLEMENTATION VERIFICATION
+
+Before merging, please answer:
+
+1. [Question about how this handles specific edge case]
+2. [Question about what error you'd see if Y failed]
+3. [Question about how you'd test this locally]
+
+Your responses confirm understanding before merge.
 ```
 
 ## Session Continuity

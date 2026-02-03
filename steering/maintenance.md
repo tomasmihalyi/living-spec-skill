@@ -2,6 +2,39 @@
 
 Create this file at `.claude/spec-steering.md` when setting up a project with Living Specs.
 
+## Tiered Approval System
+
+Not all spec changes require the same oversight level. Use this tiered system:
+
+### Tier 1: Autonomous (No Gate Required)
+
+The spec-updater agent MAY automatically update:
+- `Last Updated` timestamp in header
+- `Drift Score` in Current Status
+- Task/stage status icons (⬚ → 🔄 → ✅)
+- `Recently Completed` section
+- `Last Completed` in Current Status
+
+### Tier 2: Async Notification (Update + Notify User)
+
+The spec-updater agent SHALL update AND notify about:
+- Component Map additions (new files)
+- Technical Debt Register (new items found)
+- Next Actions priority changes
+- Decision Log entries (non-transition)
+
+### Tier 3: Synchronous Approval (Block Until Approved)
+
+The system SHALL request approval before:
+- New requirements (FR-xxx, NFR-xxx)
+- Architecture decision changes (§3)
+- Phase transitions (requires comprehension gate)
+- Scope changes (In/Out of Scope)
+- Removing items (mark superseded instead)
+- Security-related modifications
+
+---
+
 **IMPORTANT:** After creating this file, add the following to the project's `CLAUDE.md`:
 
 ```markdown
@@ -145,6 +178,32 @@ WHEN feature spec status changes THE system SHALL update the Living Spec hierarc
 | "spec update" | Offer to sync spec with current state |
 | "what's next" | Show §7 Current Focus |
 | "view as [role]" | Load role-specific view |
+
+## Agent Orchestration
+
+### When to Use Agents
+
+| Situation | Agents to Spawn |
+|-----------|-----------------|
+| Entering Planning phase | requirements-analyst, architecture-reviewer, risk-assessor (parallel) |
+| Entering Building phase | domain specialists based on scope (parallel) |
+| After implementation | spec-critic, test-specialist |
+| Phase transition | comprehension-gate (blocking) |
+| After code changes | spec-updater |
+| High drift detected | spec-updater |
+
+### Comprehension Gate Triggers
+
+SPAWN comprehension-gate WHEN:
+- Phase transition requested (Planning → Building → Operating)
+- Significant code merged without review
+- Developer approves AI-generated code
+- Spec-critic score < 70%
+
+Gate BLOCKS until:
+- All questions answered
+- Responses demonstrate understanding (not copied)
+- Responses logged in §6 Decision Log
 ```
 
 ---
