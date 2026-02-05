@@ -4,7 +4,7 @@ description: Living Specifications for Claude Code - consolidate development art
 argument-hint: "[command] or [feature description]"
 disable-model-invocation: false
 user-invocable: true
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, TodoWrite
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, TaskCreate, TaskUpdate, TaskList, AskUserQuestion
 ---
 
 # /spec - Living Specifications for Claude Code
@@ -24,29 +24,35 @@ Consolidate development artifacts into single, AI-maintainable specification fil
 
 ## First-Time Activation
 
-**MANDATORY: On first trigger in a project, you MUST ask the user which approach before doing anything else.**
+**MANDATORY: On first trigger in a project, use AskUserQuestion before doing anything else.**
 
-Present these options:
+Use the AskUserQuestion tool with this configuration:
 
+```json
+{
+  "questions": [{
+    "header": "Approach",
+    "question": "Which spec approach fits your project?",
+    "options": [
+      {
+        "label": "A) Living Spec Only (Recommended)",
+        "description": "Best for MVPs, small teams (1-5), rapid iteration. Creates single Living Spec + maintenance steering."
+      },
+      {
+        "label": "B) Living Spec + Feature Specs",
+        "description": "Best for multiple features, growing projects. Living Spec orchestrates individual feature specs (EARS format)."
+      },
+      {
+        "label": "C) Feature Specs Only",
+        "description": "Best for clear feature boundaries, simple projects. Individual specs per feature (basic workflow)."
+      }
+    ],
+    "multiSelect": false
+  }]
+}
 ```
-Which approach fits your project?
 
-A) LIVING SPEC ONLY
-   Best for: MVPs, small teams (1-5), rapid iteration
-   Creates: Single Living Spec + maintenance steering
-
-B) LIVING SPEC + FEATURE SPECS
-   Best for: Multiple features, growing projects
-   Creates: Living Spec orchestrates individual feature specs (EARS format)
-
-C) FEATURE SPECS ONLY
-   Best for: Clear feature boundaries, simple projects
-   Creates: Individual specs per feature (basic workflow)
-
-Your choice (A/B/C):
-```
-
-**Do NOT proceed until user responds with A, B, or C.**
+**Do NOT proceed until user responds.**
 
 ## Multi-Agent Architecture
 
@@ -71,41 +77,44 @@ Located at `~/.claude/skills/agents/`:
 
 ### Parallel Orchestration
 
-**Planning Phase - Spawn in Parallel:**
-```
-WHEN entering Planning phase:
-1. Spawn requirements-analyst (functional + non-functional)
-2. Spawn architecture-reviewer (design patterns, constraints)
-3. Spawn risk-assessor (security, performance, debt)
-4. Wait for all to complete
-5. Synthesize findings into Living Spec §1-§3
-```
+**Planning Phase - Spawn in Parallel using Task tool:**
+
+Use multiple Task tool calls in a SINGLE message for parallel execution:
+
+| Task Call | subagent_type | description | prompt |
+|-----------|---------------|-------------|--------|
+| 1 | general-purpose | Requirements analysis | Read ~/.claude/skills/agents/requirements-analyst.md and apply to this project |
+| 2 | general-purpose | Architecture review | Read ~/.claude/skills/agents/architecture-reviewer.md and apply to this project |
+| 3 | general-purpose | Risk assessment | Read ~/.claude/skills/agents/risk-assessor.md and apply to this project |
+
+Wait for all agents to complete, then synthesize findings into Living Spec §1-§3.
 
 **Building Phase - Domain Specialists:**
-```
-WHEN entering Building phase for feature:
-1. Analyze feature scope
-2. Spawn relevant specialists in parallel:
-   - database-specialist (if data model)
-   - api-specialist (if endpoints)
-   - frontend-specialist (if UI)
-   - security-specialist (if auth/sensitive)
-3. Synthesize into design.md
-4. Spawn test-specialist for test strategy
-```
+
+Spawn relevant specialists based on feature scope (use Task tool in parallel):
+
+| If Feature Has | Agent to Spawn | Prompt Template |
+|----------------|----------------|-----------------|
+| Data model | database-specialist | Read ~/.claude/skills/agents/database-specialist.md and analyze data requirements |
+| API endpoints | api-specialist | Read ~/.claude/skills/agents/api-specialist.md and design API contract |
+| UI components | frontend-specialist | Read ~/.claude/skills/agents/frontend-specialist.md and review UI design |
+| Auth/sensitive | security-specialist | Read ~/.claude/skills/agents/security-specialist.md and assess security |
+| Always | test-specialist | Read ~/.claude/skills/agents/test-specialist.md and create test strategy |
+
+Synthesize specialist outputs into design.md.
 
 ### Comprehension Gates (Critical)
 
 **Purpose:** Prevent skill atrophy by verifying developer understanding.
 
-```
 BEFORE any phase transition:
-1. Spawn spec-critic to review completeness
-2. Spawn comprehension-gate to generate questions
-3. Present questions to developer
-4. BLOCK until responses logged in §6 Decision Log
+1. Spawn spec-critic agent (via Task tool) to review completeness
+2. Spawn comprehension-gate agent to generate verification questions
+3. Use **AskUserQuestion tool** to present questions to developer
+4. Log responses in §6 Decision Log
 5. Only then allow transition
-```
+
+Use AskUserQuestion with multiSelect: false for each comprehension question.
 
 ## Steering Files
 
@@ -224,11 +233,22 @@ Feature specs use EARS (Easy Approach to Requirements Syntax) format:
 
 ### Creating Living Spec (Options A/B)
 1. Ask user for approach (A/B/C)
-2. Create `.claude/spec-steering.md` from maintenance template
-3. Update `CLAUDE.md` to reference spec-steering
-4. Create `.specs/00-project.living.md` from template
-5. For brownfield: Spawn parallel analysis agents
-6. Begin Planning phase with comprehension gate
+2. Ask user for project type (Greenfield/Brownfield)
+3. Create `.claude/spec-steering.md` from maintenance template
+4. Update `CLAUDE.md` to reference spec-steering
+5. Create `.specs/00-project.living.md` from template
+
+**Greenfield flow:**
+6. Generate requirements questionnaire (blocking)
+7. Get architecture decisions approved
+8. Begin Building phase after approval
+
+**Brownfield flow:**
+6. Spawn parallel analysis agents
+7. Auto-populate spec from codebase analysis
+8. Mark decisions as "✅ Inherited"
+9. User verifies accuracy (non-blocking)
+10. Ready for Building phase or feature spec creation
 
 ### Creating Feature Spec (Option B)
 1. Create `.specs/feature-[name]/` directory
@@ -256,6 +276,8 @@ D) Run drift detection
 ```
 
 ### Phase Transitions (With Comprehension Gate)
+
+**Greenfield:**
 ```
 🔵 Planning Complete
 
@@ -270,18 +292,33 @@ Comprehension Verification Required:
 Answer all questions to proceed to 🟢 Building.
 ```
 
+**Brownfield:**
+```
+🔵 Planning Complete (Brownfield)
+
+Summary:
+- Codebase: [X] components documented
+- Architecture: [pattern] - inherited
+- Tech Debt: [Y] items catalogued
+- Decisions: [Z] inherited, verified
+
+✅ Ready for Building phase or feature spec creation.
+```
+
 ## Behavior Rules
 
 1. **Never skip approach selection** on first activation
 2. **Always load workflow.md** for core logic
-3. **Block on questionnaire** - don't proceed to Architecture until Requirements questions answered
-4. **Approval gates are mandatory** - no auto-transitions
-5. **Comprehension gates required** - verify understanding at transitions
-6. **Update timestamps** on every spec modification
-7. **Calculate drift** after code changes to mapped files
-8. **Offer spec update** after completing any work
-9. **Use parallel agents** for Planning phase analysis
-10. **Use domain specialists** for Building phase implementation
-11. **Use spec-critic** after implementation to verify alignment
-12. **Use EARS format** for all feature spec requirements
-13. **Create .claude/spec-steering.md** for auto-loading
+3. **Greenfield: Block on questionnaire** - don't proceed to Architecture until Requirements questions answered
+4. **Brownfield: Auto-populate, don't block** - skip questionnaire, inherit decisions from codebase
+5. **Approval gates are mandatory** - no auto-transitions
+6. **Comprehension gates required** - verify understanding at transitions
+7. **Update timestamps** on every spec modification
+8. **Calculate drift** after code changes to mapped files
+9. **Offer spec update** after completing any work
+10. **Use parallel agents** for Planning phase analysis
+11. **Use domain specialists** for Building phase implementation
+12. **Use spec-critic** after implementation to verify alignment
+13. **Use EARS format** for all feature spec requirements
+14. **Create .claude/spec-steering.md** for auto-loading
+15. **Brownfield: Future planning is optional** - only ask future-direction questions when creating feature specs

@@ -22,13 +22,43 @@ Drift occurs when code changes without corresponding spec updates. High drift me
 drift_score = (files_modified_since_last_spec_update / total_mapped_files) × 100
 ```
 
-### How to Calculate
+### How to Calculate (Using Claude Code Tools)
 
-1. **Get Last Updated timestamp** from Living Spec header
-2. **List files in Component Map** (§4)
-3. **Check each file's last modified time** against spec's Last Updated
-4. **Count files modified after** spec update
-5. **Calculate percentage**
+1. **Get Last Updated timestamp** from Living Spec header:
+   ```
+   Use Read tool on .specs/00-*.living.md
+   Extract "Last Updated:" line value
+   ```
+
+2. **List files in Component Map** (§4):
+   ```
+   Parse Component Map table from Living Spec
+   Extract file paths from "Location" column
+   ```
+
+3. **Check each file's last modified time** using Bash:
+   ```bash
+   # macOS - get modification time as Unix timestamp
+   stat -f '%m' src/path/to/file.ts
+
+   # For multiple files in Component Map:
+   for f in src/api/index.ts src/components/App.tsx; do
+     if [ -f "$f" ]; then
+       echo "$(stat -f '%m' "$f") $f"
+     fi
+   done
+   ```
+
+4. **Compare timestamps and calculate percentage**:
+   - Convert spec "Last Updated" to Unix timestamp
+   - Count files with modification time > spec timestamp
+   - drift_score = (changed_files / total_mapped_files) × 100
+
+5. **Find new unmapped files** using Glob:
+   ```
+   Glob pattern: src/**/*.{ts,tsx,js,jsx}
+   Compare results against Component Map entries
+   ```
 
 ### Example
 
@@ -220,4 +250,47 @@ Best practices to minimize drift:
 1. **Update spec immediately** after completing each task
 2. **Add files to Component Map** as you create them
 3. **Run `/spec drift`** before starting new work sessions
-4. **Use TodoWrite** alongside spec updates
+4. **Use TaskCreate/TaskUpdate** alongside spec updates
+
+## Implementation Reference
+
+### Full Drift Check Script (Bash)
+
+```bash
+# Get spec last updated (ISO format from header)
+SPEC_FILE=".specs/00-*.living.md"
+SPEC_DATE=$(grep "Last Updated" $SPEC_FILE | head -1 | cut -d: -f2- | xargs)
+
+# Convert to Unix timestamp (macOS)
+SPEC_TS=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$SPEC_DATE" "+%s" 2>/dev/null || echo "0")
+
+# Check component files (extract from Component Map)
+CHANGED=0
+TOTAL=0
+
+# Example for common locations - adapt to actual Component Map
+for f in src/**/*.ts src/**/*.tsx; do
+  if [ -f "$f" ]; then
+    TOTAL=$((TOTAL + 1))
+    FILE_TS=$(stat -f '%m' "$f")
+    if [ "$FILE_TS" -gt "$SPEC_TS" ]; then
+      CHANGED=$((CHANGED + 1))
+      echo "Modified: $f"
+    fi
+  fi
+done
+
+# Calculate drift
+if [ $TOTAL -gt 0 ]; then
+  DRIFT=$((CHANGED * 100 / TOTAL))
+  echo "Drift Score: ${DRIFT}%"
+fi
+```
+
+### Using Glob for New File Detection
+
+```
+Pattern: src/**/*.{ts,tsx,js,jsx}
+Purpose: Find all source files
+Action: Compare against Component Map entries to find unmapped files
+```

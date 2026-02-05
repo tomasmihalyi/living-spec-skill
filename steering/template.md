@@ -2,7 +2,133 @@
 
 Use this template to create `.specs/00-[project].living.md`
 
+## Template Variants
+
+Choose the appropriate template based on project complexity:
+
+| Variant | Best For | Sections | Est. Setup |
+|---------|----------|----------|------------|
+| **Minimal** | MVPs, hackathons, POCs | Intent, Requirements (3-5 Q), Implementation (3-5 stages), Next Actions | Quick |
+| **Standard** | Most projects, small teams | Full template below | Moderate |
+| **Enterprise** | Compliance, audit trails | Standard + additional tracking sections | Comprehensive |
+
+### Using Variants
+
+Use AskUserQuestion to determine variant:
+```json
+{
+  "questions": [{
+    "header": "Template",
+    "question": "Which template complexity fits your needs?",
+    "options": [
+      {"label": "Minimal (Recommended for MVPs)", "description": "Quick setup with essential sections only"},
+      {"label": "Standard", "description": "Full Living Spec with all sections"},
+      {"label": "Enterprise", "description": "Extended tracking for compliance/audit"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
 ---
+
+## Minimal Template
+
+For MVPs, hackathons, and proof-of-concepts. Creates a lightweight spec focused on essentials.
+
+```markdown
+# Living Spec: [Project Name]
+
+> **Last Updated**: [YYYY-MM-DDTHH:MM:SS]
+> **Phase**: 🔵 Planning | 🟢 Building | 🟡 Operating
+> **Owner**: @[username]
+
+## Current Status
+
+| Next Action | Blockers | Drift Score |
+|-------------|----------|-------------|
+| [What to do next] | None | 0% ✅ |
+
+---
+
+## 1. Intent
+
+### Problem
+> [2-3 sentence problem description]
+
+### Success Criteria
+- [ ] [Primary success metric]
+- [ ] [Secondary metric]
+
+### Scope
+**In:** [What's included]
+**Out:** [What's excluded]
+
+---
+
+## 2. Requirements
+
+### Inherited Decisions (Brownfield)
+> Skip for greenfield. Auto-populated from codebase.
+
+| Decision | Value | Status |
+|----------|-------|--------|
+| [Tech choice] | [detected] | ✅ Inherited |
+
+### Key Questions (Greenfield Only)
+> Skip for brownfield.
+
+**Q1: [Most important question]**
+Answer: _______________
+
+**Q2: [Second question]**
+Answer: _______________
+
+**Q3: [Third question]**
+Answer: _______________
+
+---
+
+## 3. Implementation
+
+| Stage | Goal | Status |
+|-------|------|--------|
+| 1 | [First milestone] | ⬚ |
+| 2 | [Second milestone] | ⬚ |
+| 3 | [Third milestone] | ⬚ |
+
+### Component Map
+
+| Component | Location | Status |
+|-----------|----------|--------|
+| [Main component] | `src/path` | ⬚ |
+
+---
+
+## 4. Next Actions
+
+- [ ] **[Current focus]**
+- [ ] [Next item]
+
+### Recently Completed
+| Action | Date |
+|--------|------|
+| [Initial setup] | [Date] |
+
+---
+
+## Decision Log
+
+| Date | Decision | Outcome |
+|------|----------|---------|
+| [Date] | Created spec | - |
+```
+
+---
+
+## Standard Template
+
+For most projects. Full Living Spec with all sections.
 
 ```markdown
 # Living Spec: [Project/Feature Name]
@@ -95,9 +221,39 @@ Use this template to create `.specs/00-[project].living.md`
 
 ## 2. Requirements
 
-### Requirements Questionnaire
+### Brownfield: Inherited Decisions
 
-> **⚠️ STOP: Complete this questionnaire before proceeding to Architecture.**
+> **Auto-populated from codebase analysis. Review and confirm accuracy.**
+> **Skip this section for greenfield projects.**
+
+| Decision | Current Choice | Source | Status |
+|----------|---------------|--------|--------|
+| Database | [detected from codebase] | auto | ✅ Inherited |
+| Framework | [detected from codebase] | auto | ✅ Inherited |
+| Architecture | [detected from codebase] | auto | ✅ Inherited |
+| Language | [detected from codebase] | auto | ✅ Inherited |
+
+**Verification:** [ ] User has reviewed and confirmed inherited decisions are accurate
+
+---
+
+### Future Considerations (Brownfield - Optional)
+
+> These questions are for planning FUTURE features. Non-blocking.
+> Answer these when creating feature specs, not during initial documentation.
+
+| Question | Current State | Future Direction | Priority |
+|----------|--------------|------------------|----------|
+| Authentication | [none/basic/oauth] | [keep/add/change] | [deferred] |
+| Database | [current DB] | [keep/migrate] | [deferred] |
+| Deployment | [current state] | [keep/cloud/container] | [deferred] |
+
+---
+
+### Requirements Questionnaire (Greenfield Only)
+
+> **⚠️ STOP (Greenfield): Complete this questionnaire before proceeding to Architecture.**
+> **ℹ️ (Brownfield): Skip this section - requirements auto-populated from codebase analysis.**
 
 #### Q1: [Question Title]
 **Question:** [Detailed question about a key requirement or decision]
@@ -243,10 +399,17 @@ Use this template to create `.specs/00-[project].living.md`
 
 > All items must be checked before entering Building phase.
 
+**Greenfield Projects:**
 - [ ] Intent section complete (Problem, Success Criteria, Scope)
 - [ ] Questionnaire 100% answered
 - [ ] Architecture decisions approved
 - [ ] Traceability links established
+
+**Brownfield Projects:**
+- [ ] Intent section complete (auto-populated, user-verified)
+- [ ] Inherited decisions reviewed and confirmed
+- [ ] Architecture documented from codebase
+- [ ] Technical debt catalogued
 
 **Gate Status:** 🔒 Locked | 🔓 Unlocked
 **Unlocked Date:** [YYYY-MM-DDTHH:MM:SS]
@@ -406,8 +569,10 @@ Use this template to create `.specs/00-[project].living.md`
 ## Template Usage Notes
 
 1. **Delete sections marked (Brownfield Only)** for greenfield projects
-2. **Delete sections marked (Option B Only)** if using Option A
-3. **Adjust questionnaire** to project complexity (3-10 questions)
-4. **Adjust stages** to project size (3-10 stages)
-5. **Add/remove metrics** based on what's measurable
-6. **Replace all [placeholders]** with actual content
+2. **Delete sections marked (Greenfield Only)** for brownfield projects
+3. **Delete sections marked (Option B Only)** if using Option A
+4. **Greenfield:** Adjust questionnaire to project complexity (3-10 questions)
+5. **Brownfield:** Auto-populate inherited decisions, skip questionnaire
+6. **Adjust stages** to project size (3-10 stages)
+7. **Add/remove metrics** based on what's measurable
+8. **Replace all [placeholders]** with actual content

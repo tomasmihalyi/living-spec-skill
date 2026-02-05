@@ -4,65 +4,78 @@ Use this template to set up automation hooks for Living Spec projects.
 
 ## Overview
 
-Claude Code hooks enable automatic actions at specific workflow points. This template provides hooks for:
+Claude Code hooks enable automatic actions at specific workflow points. Configure hooks in `.claude/settings.local.json` or via the `/hooks` command.
+
+This template provides hooks for:
 - Automatic drift detection after file changes
-- Spec update reminders before stopping
-- Session start context loading
-- Comprehension gate enforcement
+- Spec update reminders after code modifications
+- Pre-commit spec validation
 
 ## Setup Instructions
 
-1. Create `.claude/hooks/` directory in your project
-2. Copy the hooks.json content below
-3. Customize matchers and prompts as needed
-4. Restart Claude Code session to load hooks
+1. Add hooks to `.claude/settings.local.json` in your project
+2. Or use the `/hooks add` command to add hooks interactively
+3. Hooks execute shell commands that can output messages to the conversation
+
+## Important Notes
+
+Claude Code hooks support these event types:
+- `PreToolCall` - Before a tool is executed
+- `PostToolCall` - After a tool completes
+- `Notification` - For async notifications
+- `Stop` - Before session ends
+
+Hooks can:
+- Run shell commands
+- Output text to the conversation
+- Block tool execution (PreToolCall only)
 
 ## Hooks Configuration
 
-Create `.claude/hooks/hooks.json`:
+Add to `.claude/settings.local.json` in your project root:
 
 ```json
 {
-  "description": "Living Spec automation hooks",
   "hooks": {
-    "PostToolUse": [
+    "PostToolCall": [
       {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "A file was modified. Check if .specs/00-*.living.md exists and if the modified file is listed in §4 Component Map. Return JSON: {\"shouldCheckDrift\": boolean, \"file\": \"path\", \"inComponentMap\": boolean}",
-            "timeout": 15000
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Before stopping, check: 1) Were Write/Edit tools used this session? 2) Does .specs/00-*.living.md exist? If both true, remind the user about updating the Living Spec. Return: {\"specUpdateNeeded\": boolean, \"reason\": \"summary of changes\"}",
-            "timeout": 15000
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "*",
+        "matcher": {
+          "tool": "Write",
+          "pathPattern": "src/**/*.{ts,tsx,js,jsx}"
+        },
         "hooks": [
           {
             "type": "command",
-            "command": "if ls .specs/00-*.living.md 1>/dev/null 2>&1; then echo '{\"hasSpec\": true, \"specPath\": \"'$(ls .specs/00-*.living.md)'\"}'; else echo '{\"hasSpec\": false}'; fi",
-            "timeout": 5000
+            "command": "if [ -f .specs/00-*.living.md ]; then echo 'DRIFT_CHECK: Source file modified. Consider running /spec drift'; fi"
+          }
+        ]
+      },
+      {
+        "matcher": {
+          "tool": "Edit",
+          "pathPattern": "src/**/*.{ts,tsx,js,jsx}"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .specs/00-*.living.md ]; then echo 'DRIFT_CHECK: Source file modified. Consider running /spec drift'; fi"
           }
         ]
       }
     ]
   }
 }
+```
+
+### Alternative: Using /hooks Command
+
+```bash
+# Add drift detection hook interactively
+/hooks add PostToolCall
+
+# When prompted:
+# - Matcher: tool=Write, pathPattern=src/**/*.{ts,tsx}
+# - Command: echo 'DRIFT_CHECK: Consider /spec drift'
 ```
 
 ## Hook Descriptions

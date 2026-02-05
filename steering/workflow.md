@@ -28,37 +28,47 @@ Living Spec leverages specialized subagents for parallel analysis and domain exp
 
 ### Spawning Agents
 
-Use the Task tool to spawn agents. Example:
-```
-Task tool with:
-- subagent_type: "general-purpose"
-- prompt: Load agent instructions from ~/.claude/skills/agents/[agent-name].md and execute
-- description: "[agent-name] analysis"
-```
+Use the Task tool to spawn agents. Call multiple Task tools in a SINGLE message for parallel execution.
+
+**Required parameters:**
+- `subagent_type`: "general-purpose" (for all skill agents)
+- `description`: Short description (3-5 words), e.g., "Requirements analysis"
+- `prompt`: "Read ~/.claude/skills/agents/[agent-name].md and apply its instructions to [specific task]"
+
+**Example - Parallel Planning Agents:**
+Send one message with three Task tool calls:
+1. Task: subagent_type=general-purpose, description="Requirements analysis", prompt="Read ~/.claude/skills/agents/requirements-analyst.md..."
+2. Task: subagent_type=general-purpose, description="Architecture review", prompt="Read ~/.claude/skills/agents/architecture-reviewer.md..."
+3. Task: subagent_type=general-purpose, description="Risk assessment", prompt="Read ~/.claude/skills/agents/risk-assessor.md..."
 
 ## First-Time Flow
 
-### Step 1: Present Options (BLOCKING)
+### Step 1: Present Options (Use AskUserQuestion Tool)
 
-```
-Which approach fits your project?
+Use the AskUserQuestion tool with this configuration:
 
-A) LIVING SPEC ONLY
-   Best for: MVPs, small teams (1-5), rapid iteration
-   Creates: Single Living Spec + maintenance steering
-   Overhead: ~15 min setup, ~2 min per update
-
-B) LIVING SPEC + FEATURE SPECS
-   Best for: Multiple features, growing projects
-   Creates: Living Spec orchestrates individual feature specs
-   Overhead: ~30 min setup, scales with features
-
-C) FEATURE SPECS ONLY
-   Best for: Clear feature boundaries, simple projects
-   Creates: Individual specs per feature
-   Overhead: ~10 min per feature
-
-Your choice (A/B/C):
+```json
+{
+  "questions": [{
+    "header": "Approach",
+    "question": "Which spec approach fits your project?",
+    "options": [
+      {
+        "label": "A) Living Spec Only (Recommended)",
+        "description": "Best for MVPs, small teams (1-5), rapid iteration. Single spec + steering."
+      },
+      {
+        "label": "B) Living Spec + Feature Specs",
+        "description": "Best for multiple features, growing projects. Orchestrated feature specs."
+      },
+      {
+        "label": "C) Feature Specs Only",
+        "description": "Best for clear feature boundaries, simple projects. Individual specs only."
+      }
+    ],
+    "multiSelect": false
+  }]
+}
 ```
 
 **Do NOT proceed until user responds. This is a blocking requirement.**
@@ -73,12 +83,20 @@ Your choice (A/B/C):
 
 ### Step 3: Project Type Detection
 
-Ask the user:
-```
-Is this a new project (greenfield) or existing codebase (brownfield)?
+Use AskUserQuestion tool:
 
-A) Greenfield - Starting fresh
-B) Brownfield - Existing code to document
+```json
+{
+  "questions": [{
+    "header": "Project Type",
+    "question": "Is this a new project or existing codebase?",
+    "options": [
+      {"label": "Greenfield", "description": "Starting fresh - no existing code to document"},
+      {"label": "Brownfield", "description": "Existing codebase to document and analyze"}
+    ],
+    "multiSelect": false
+  }]
+}
 ```
 
 ### Step 4: Setup Based on Type
@@ -232,19 +250,39 @@ WHEN entering Planning phase, spawn these agents IN PARALLEL:
    - Failure Triggers (recommended)
    - Scope boundaries (required)
 
-4. Generate Requirements Questionnaire:
-   - Create 3-10 questions based on project complexity
+4. **Generate Requirements (Project-Type Aware):**
+
+   **FOR GREENFIELD:**
+   - Generate 3-10 questions to determine WHAT to build
+   - Questions define scope, tech choices, priorities
    - Each question must have:
      - Clear question text
      - Options (A/B/C or open-ended)
      - Answer field
      - Status (⬚/✅)
 
-5. **BLOCK until questionnaire complete:**
+   **FOR BROWNFIELD:**
+   - AUTO-POPULATE requirements from codebase analysis
+   - Mark existing decisions as "✅ Inherited"
+   - NO blocking questionnaire required
+   - Generate a "Future Considerations" section (non-blocking, optional)
+   - User answers future-direction questions only when creating feature specs
+
+5. **Blocking Behavior (Greenfield Only):**
    ```
    ⚠️ STOP: Complete the Requirements Questionnaire before proceeding to Architecture.
 
    Questions remaining: [X]
+   ```
+
+   **For Brownfield, skip this gate** - architecture is already determined by existing code.
+   Instead, present:
+   ```
+   ✅ Requirements auto-populated from codebase analysis.
+   ✅ Architecture decisions inherited from existing code.
+
+   Review the documented state and confirm accuracy.
+   Ready to proceed? (yes/make corrections)
    ```
 
 6. Document Architecture decisions:
@@ -266,10 +304,19 @@ WHEN entering Planning phase, spawn these agents IN PARALLEL:
    ```
 
 **Exit Criteria:**
+
+**Greenfield:**
 - [ ] Intent section complete
 - [ ] All questionnaire questions answered (✅)
 - [ ] Architecture decisions approved
 - [ ] Risk assessment reviewed
+
+**Brownfield:**
+- [ ] Intent section complete (auto-populated, user-verified)
+- [ ] Inherited decisions documented (✅ Inherited)
+- [ ] Architecture documented from codebase
+- [ ] Technical debt catalogued
+- [ ] User confirmed accuracy of analysis
 
 ### 🟢 Building Phase
 
@@ -353,7 +400,7 @@ WHEN entering Building phase for a feature, spawn relevant specialists IN PARALL
    - Link tests to requirements (traceability)
    - Define coverage targets
 
-8. **Use TodoWrite** to track stage execution:
+8. **Use TaskCreate/TaskUpdate** to track stage execution:
    - Create todo item per stage
    - Mark in_progress when starting
    - Update spec status as completing
@@ -422,6 +469,7 @@ Research shows AI assistance can reduce skill mastery by 17% when developers rub
 
 ### Planning → Building
 
+**Greenfield Transition:**
 ```
 🔵 Planning Phase Complete
 
@@ -436,6 +484,24 @@ Checklist:
 ✅ Questionnaire complete
 ✅ Architecture approved
 ✅ Risk assessment reviewed
+```
+
+**Brownfield Transition:**
+```
+🔵 Planning Phase Complete (Brownfield)
+
+Summary:
+- Codebase: [X] components documented
+- Architecture: [pattern] - inherited from existing code
+- Tech Debt: [Y] items catalogued
+- Decisions: [Z] inherited, user-verified
+
+Checklist:
+✅ Intent section complete (auto-populated)
+✅ Inherited decisions documented
+✅ Architecture documented from codebase
+✅ Technical debt catalogued
+✅ User verified accuracy
 
 ─────────────────────────────────────────────────────
 
@@ -460,7 +526,19 @@ Before proceeding to Building, please answer these questions:
 
 Your responses will be logged in §6 Decision Log.
 
-Ready to proceed to 🟢 Building? (yes/no)
+After receiving responses, use AskUserQuestion to confirm transition:
+```json
+{
+  "questions": [{
+    "header": "Transition",
+    "question": "Ready to proceed to Building phase?",
+    "options": [
+      {"label": "Yes, proceed", "description": "All requirements understood, move to Building"},
+      {"label": "No, review more", "description": "Need to revisit some sections first"}
+    ],
+    "multiSelect": false
+  }]
+}
 ```
 
 ### Building → Operating
@@ -583,11 +661,21 @@ When user returns to a project with existing Living Spec:
 
 Adjust depth based on project size:
 
+**Greenfield Projects:**
+
 | Complexity | Questionnaire | Decisions | Stages | Metrics |
 |------------|---------------|-----------|--------|---------|
 | Simple (1-2 weeks) | 3-5 questions | 1-2 | 3-5 | 2-3 |
 | Moderate (1-2 months) | 5-10 questions | 3-5 | 5-10 | 4-6 |
 | Complex (3+ months) | 10+ questions | 5+ | Multi-phase | 6+ |
+
+**Brownfield Projects:**
+
+| Complexity | Inherited Decisions | Tech Debt Items | Components | Future Considerations |
+|------------|--------------------:|----------------:|-----------:|----------------------:|
+| Simple | 3-5 auto-documented | 1-5 | 5-10 | 1-2 optional |
+| Moderate | 5-10 auto-documented | 5-10 | 10-30 | 2-4 optional |
+| Complex | 10+ auto-documented | 10+ | 30+ | 4+ optional |
 
 ## Creating Feature Specs (Option B)
 
@@ -643,11 +731,13 @@ Update "Related Feature Specs" section in the Living Spec:
 ## Anti-Patterns to Avoid
 
 - ❌ Skipping approach selection on first use
-- ❌ Proceeding to Architecture before questionnaire complete
+- ❌ (Greenfield) Proceeding to Architecture before questionnaire complete
+- ❌ (Brownfield) Blocking on questionnaire - should auto-populate instead
+- ❌ (Brownfield) Asking future-planning questions during initial documentation
 - ❌ Auto-transitioning phases without approval
 - ❌ Skipping timestamps on decisions
 - ❌ Deleting history instead of marking superseded
-- ❌ Duplicating task tracking (use TodoWrite, reference in spec)
+- ❌ Duplicating task tracking (use TaskCreate/TaskUpdate, reference in spec)
 - ❌ Creating feature specs without Living Spec orchestration (Option B)
 - ❌ Ignoring drift score warnings
 - ❌ Using free-form requirements instead of EARS format

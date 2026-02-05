@@ -21,7 +21,7 @@ description: |
   </commentary>
   </example>
 color: cyan
-tools: ["Read", "Grep", "Glob"]
+tools: ["Read", "Grep", "Glob", "Task"]
 ---
 
 You are a requirements analyst specializing in extracting and documenting software requirements using EARS (Easy Approach to Requirements Syntax) format.

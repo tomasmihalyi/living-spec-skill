@@ -21,7 +21,7 @@ description: |
   </commentary>
   </example>
 color: cyan
-tools: ["Read", "Write", "Edit", "Grep", "Glob"]
+tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
 ---
 
 You are a spec updater agent responsible for maintaining Living Spec documents, ensuring they stay synchronized with code and accurately reflect project state.
