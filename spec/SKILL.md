@@ -94,14 +94,13 @@ See `steering/ears-reference.md` for syntax. Key templates:
 
 ```
 project/
-├── .claude/spec-steering.md    # Auto-loaded (via CLAUDE.md)
-├── .specs/
-│   ├── 00-project.living.md    # Main spec
-│   └── feature-*/              # Feature specs (Option B)
-│       ├── requirements.md
-│       ├── design.md
-│       └── tasks.md
-└── CLAUDE.md                   # References spec-steering
+├── CLAUDE.md                   # Project instructions + spec context (auto-loaded)
+└── .specs/
+    ├── 00-project.living.md    # Main spec
+    └── feature-*/              # Feature specs (Option B)
+        ├── requirements.md
+        ├── design.md
+        └── tasks.md
 ```
 
 ## Quick Reference
@@ -121,7 +120,34 @@ project/
 6. Comprehension gates verify understanding
 7. Use parallel agents for analysis
 8. Use EARS format for requirements
-9. Create .claude/spec-steering.md for auto-loading
+9. Add spec context directly to CLAUDE.md (do NOT create separate steering files)
+10. Sub-agents must return text output only - do NOT let them write files. The main orchestrator writes all spec files to `.specs/`
+
+## CLAUDE.md Spec Section Template
+
+When setting up specs, add this to the project's CLAUDE.md:
+
+```markdown
+## Specification
+- **Main Spec:** `.specs/00-project.living.md`
+- **Approach:** [A/B/C]
+- **Phase:** [🔵 Planning | 🟢 Building | 🟡 Operating]
+
+## Key Paths
+[List important file paths]
+
+## Development Guidelines
+1. Before coding: Check spec for requirements
+2. New features: Create feature spec in `.specs/feature-<name>/`
+3. After changes: Update spec if architecture changes
+
+## Tiered Approval
+| Change Type | Approval |
+|-------------|----------|
+| Bug fixes, typos | Autonomous |
+| New components, endpoints | Notify (update spec) |
+| Architecture changes | Blocking (discuss first) |
+```
 
 ## Status Icons
 
