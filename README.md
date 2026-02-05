@@ -1,6 +1,6 @@
 # Living Spec Skill for Claude Code
 
-> **Version:** 2.2 (Optimized)
+> **Version:** 2.3
 > **Last Updated:** 2026-02-05
 
 Multi-agent orchestration for AI-maintainable specifications using AI-DLC principles.
@@ -26,7 +26,7 @@ cp -r living-spec-skill/{spec,agents,steering} ~/.claude/skills/
 
 ```
 ~/.claude/skills/
-├── spec/SKILL.md           # Entry point (133 lines)
+├── spec/SKILL.md           # Entry point (~160 lines)
 ├── agents/
 │   ├── INDEX.md            # Agent directory & spawning guide
 │   └── [11 agents]         # Compressed agent files (~60 lines each)
@@ -70,15 +70,27 @@ cp -r living-spec-skill/{spec,agents,steering} ~/.claude/skills/
 | comprehension-gate | Understanding | haiku |
 | spec-updater | Maintenance | haiku |
 
-## Optimization (v2.2)
+## Project Structure (Generated)
 
-| Metric | Before | After | Reduction |
-|--------|--------|-------|-----------|
-| SKILL.md | 325 lines | 133 lines | 60% |
-| Agent files (avg) | 150 lines | 60 lines | 60% |
-| Total tokens | ~7,500 | ~4,000 | 47% |
+```
+project/
+├── CLAUDE.md                   # Project instructions + spec context (auto-loaded)
+└── .specs/
+    ├── 00-project.living.md    # Main living specification
+    └── feature-*/              # Feature specs (Option B)
+        ├── requirements.md
+        ├── design.md
+        └── tasks.md
+```
 
-Key changes:
+## Changelog
+
+### v2.3
+- Simplified: Spec context goes directly in `CLAUDE.md` (no separate steering file)
+- Added rule: Sub-agents return text only, orchestrator writes files
+- Added CLAUDE.md template section
+
+### v2.2
 - Consolidated agent spawning into `agents/INDEX.md`
 - Created `steering/ears-reference.md` as single source
 - Deduplicated SKILL.md to reference steering files
