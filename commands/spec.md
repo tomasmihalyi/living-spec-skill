@@ -1,9 +1,7 @@
 ---
 name: spec
-description: Living Specifications for Claude Code - consolidate development artifacts into AI-maintainable spec files with AI-DLC principles.
+description: Living Specifications - consolidate development artifacts into AI-maintainable spec files with AI-DLC principles.
 argument-hint: "[command] or [feature description]"
-disable-model-invocation: false
-user-invocable: true
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, Task, TaskCreate, TaskUpdate, TaskList, AskUserQuestion
 ---
 
@@ -44,27 +42,60 @@ Then ask Greenfield/Brownfield via AskUserQuestion.
 
 ## Core Files
 
-**Always load:** `~/.claude/skills/steering/workflow.md` (core logic)
+**Always load:** `${CLAUDE_PLUGIN_ROOT}/skills/living-spec/steering/workflow.md` (core logic)
 
 | File | Load When |
 |------|-----------|
-| `steering/workflow.md` | Always |
-| `steering/template.md` | Creating new spec |
-| `steering/ears-reference.md` | Writing requirements |
-| `steering/drift-detection.md` | `/spec drift` |
-| `agents/INDEX.md` | Spawning agents |
+| `${CLAUDE_PLUGIN_ROOT}/skills/living-spec/steering/workflow.md` | Always |
+| `${CLAUDE_PLUGIN_ROOT}/skills/living-spec/steering/template.md` | Creating new spec |
+| `${CLAUDE_PLUGIN_ROOT}/skills/living-spec/steering/ears-reference.md` | Writing requirements |
+| `${CLAUDE_PLUGIN_ROOT}/skills/living-spec/steering/drift-detection.md` | `/spec drift` |
 
 ## Multi-Agent Orchestration
 
-See `agents/INDEX.md` for complete agent directory and spawning patterns.
-
 **Planning Phase:** Spawn in parallel via Task tool:
-- requirements-analyst, architecture-reviewer, risk-assessor
+- `living-spec-skill:requirements-analyst`
+- `living-spec-skill:architecture-reviewer`
+- `living-spec-skill:risk-assessor`
 
 **Building Phase:** Spawn relevant specialists:
-- database, api, frontend, security, test specialists
+- `living-spec-skill:database-specialist`
+- `living-spec-skill:api-specialist`
+- `living-spec-skill:frontend-specialist`
+- `living-spec-skill:security-specialist`
+- `living-spec-skill:test-specialist`
 
-**Quality Gates:** spec-critic, comprehension-gate
+**Quality Gates:**
+- `living-spec-skill:spec-critic`
+- `living-spec-skill:comprehension-gate`
+
+**Maintenance:**
+- `living-spec-skill:spec-updater`
+
+### Spawning Pattern
+
+Use the Task tool to spawn agents. Call multiple Task tools in a SINGLE message for parallel execution.
+
+**Required parameters:**
+- `subagent_type`: `"living-spec-skill:<agent-name>"` (plugin agent)
+- `description`: Short description (3-5 words)
+- `prompt`: Task-specific instructions
+
+**Example - Parallel Planning Agents:**
+Send one message with three Task tool calls:
+1. Task: subagent_type=living-spec-skill:requirements-analyst, description="Requirements analysis", prompt="Analyze this project and extract requirements..."
+2. Task: subagent_type=living-spec-skill:architecture-reviewer, description="Architecture review", prompt="Analyze this project's architecture..."
+3. Task: subagent_type=living-spec-skill:risk-assessor, description="Risk assessment", prompt="Assess risks for this project..."
+
+**Building Phase (Conditional):**
+
+| Feature Has | Spawn Agent |
+|-------------|-------------|
+| Data model changes | `living-spec-skill:database-specialist` |
+| API endpoints | `living-spec-skill:api-specialist` |
+| UI components | `living-spec-skill:frontend-specialist` |
+| Auth/sensitive data | `living-spec-skill:security-specialist` |
+| Always (after design) | `living-spec-skill:test-specialist` |
 
 ## AI-DLC Phases
 
@@ -84,7 +115,7 @@ See `agents/INDEX.md` for complete agent directory and spawning patterns.
 
 ## EARS Format
 
-See `steering/ears-reference.md` for syntax. Key templates:
+See `${CLAUDE_PLUGIN_ROOT}/skills/living-spec/steering/ears-reference.md` for syntax. Key templates:
 
 - **Ubiquitous:** THE system SHALL [response]
 - **Event:** WHEN [trigger] THE system SHALL [response]

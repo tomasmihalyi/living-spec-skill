@@ -1,7 +1,9 @@
 ---
 name: api-specialist
-description: Design REST endpoints, contracts, and error handling.
-tools: ["Read", "Grep", "Glob"]
+description: Design REST endpoints, contracts, and error handling. Use for API design during Building phase.
+model: haiku
+color: green
+allowed-tools: Read, Grep, Glob
 ---
 
 # API Specialist

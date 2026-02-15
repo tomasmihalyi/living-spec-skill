@@ -1,0 +1,21 @@
+{
+  "name": "living-spec-marketplace",
+  "owner": {
+    "name": "Tomas Mihalyi",
+    "email": "tomas@mihalyi.dev"
+  },
+  "plugins": [
+    {
+      "name": "living-spec-skill",
+      "source": ".",
+      "description": "Multi-agent orchestration for AI-maintainable specifications using AI-DLC principles. 11 specialist agents, EARS format requirements, comprehension gates, drift detection, and role-based views.",
+      "version": "2.3.0",
+      "author": {
+        "name": "Tomas Mihalyi"
+      },
+      "repository": "https://github.com/tomasmihalyi/living-spec-skill",
+      "license": "MIT",
+      "keywords": ["specifications", "documentation", "multi-agent", "ears", "ai-dlc", "requirements", "architecture"]
+    }
+  ]
+}

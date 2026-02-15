@@ -1,15 +1,33 @@
-# Living Spec Skill for Claude Code
+# Living Spec Plugin for Claude Code
 
-> **Version:** 2.3
-> **Last Updated:** 2026-02-05
+> **Version:** 2.3.0
+> **Last Updated:** 2026-02-16
 
 Multi-agent orchestration for AI-maintainable specifications using AI-DLC principles.
 
 ## Installation
 
+### From Marketplace
+
+```bash
+# Add the marketplace
+/plugin marketplace add tomasmihalyi/living-spec-skill
+
+# Install the plugin
+/plugin install living-spec-skill@living-spec-marketplace
+```
+
+### Direct Install
+
+```bash
+claude plugin add github:tomasmihalyi/living-spec-skill
+```
+
+### Local Install
+
 ```bash
 git clone https://github.com/tomasmihalyi/living-spec-skill.git
-cp -r living-spec-skill/{spec,agents,steering} ~/.claude/skills/
+claude plugin add ./living-spec-skill
 ```
 
 ## Usage
@@ -22,29 +40,55 @@ cp -r living-spec-skill/{spec,agents,steering} ~/.claude/skills/
 /spec view <role>        # Role-based view (developer|manager|qa|architect)
 ```
 
-## Structure
+## Plugin Structure
 
 ```
-~/.claude/skills/
-├── spec/SKILL.md           # Entry point (~160 lines)
-├── agents/
-│   ├── INDEX.md            # Agent directory & spawning guide
-│   └── [11 agents]         # Compressed agent files (~60 lines each)
-└── steering/
-    ├── workflow.md         # Core workflow logic
-    ├── template.md         # Spec templates (minimal/standard)
-    ├── ears-reference.md   # EARS format reference
-    └── drift-detection.md  # Drift calculation
+living-spec-skill/
+├── .claude-plugin/
+│   └── plugin.json              # Plugin manifest
+├── commands/
+│   └── spec.md                  # /spec slash command
+├── agents/                      # 11 specialist agents (auto-discovered)
+│   ├── requirements-analyst.md
+│   ├── architecture-reviewer.md
+│   ├── risk-assessor.md
+│   ├── database-specialist.md
+│   ├── api-specialist.md
+│   ├── frontend-specialist.md
+│   ├── security-specialist.md
+│   ├── test-specialist.md
+│   ├── spec-critic.md
+│   ├── comprehension-gate.md
+│   └── spec-updater.md
+└── skills/
+    └── living-spec/
+        ├── SKILL.md             # Auto-activating skill
+        └── steering/            # Workflow logic and templates
+            ├── workflow.md
+            ├── template.md
+            ├── ears-reference.md
+            ├── ears-template.md
+            ├── drift-detection.md
+            ├── maintenance.md
+            ├── decisions.md
+            ├── traceability.md
+            ├── hooks-template.md
+            └── views/
+                ├── developer.md
+                ├── manager.md
+                ├── qa.md
+                └── architect.md
 ```
 
 ## Key Features
 
-- **Multi-Agent Orchestration** - Parallel analysis via Task tool
+- **Multi-Agent Orchestration** - 11 specialized agents with parallel execution
 - **EARS Format** - Structured, testable requirements
-- **Comprehension Gates** - Prevent skill atrophy
+- **Comprehension Gates** - Prevent skill atrophy at phase transitions
 - **Tiered Approval** - Autonomous/Notify/Blocking changes
 - **Drift Detection** - Track spec-code divergence
 - **Template Variants** - Minimal/Standard/Enterprise
+- **Role-Based Views** - Developer, Manager, QA, Architect
 
 ## AI-DLC Phases
 
@@ -72,6 +116,8 @@ cp -r living-spec-skill/{spec,agents,steering} ~/.claude/skills/
 
 ## Project Structure (Generated)
 
+When `/spec` is activated, it creates:
+
 ```
 project/
 ├── CLAUDE.md                   # Project instructions + spec context (auto-loaded)
@@ -85,26 +131,22 @@ project/
 
 ## Changelog
 
+### v2.3.0
+- Converted to Claude Code plugin format
+- Agents auto-discovered and spawnable as `living-spec-skill:<agent-name>`
+- Steering files co-located with skill at `skills/living-spec/steering/`
+- Portable paths via `${CLAUDE_PLUGIN_ROOT}`
+- Added `model` hints to agent frontmatter
+
 ### v2.3
 - Simplified: Spec context goes directly in `CLAUDE.md` (no separate steering file)
 - Added rule: Sub-agents return text only, orchestrator writes files
 - Added CLAUDE.md template section
 
 ### v2.2
-- Consolidated agent spawning into `agents/INDEX.md`
-- Created `steering/ears-reference.md` as single source
-- Deduplicated SKILL.md to reference steering files
-- Compressed all agent files (removed boilerplate examples)
-
-## Claude Code Tools Used
-
-| Tool | Usage |
-|------|-------|
-| AskUserQuestion | User prompts, comprehension gates |
-| Task | Parallel agent spawning |
-| TaskCreate/Update | Progress tracking |
-| Bash | Drift detection (timestamps) |
-| Glob | File discovery |
+- Consolidated agent spawning
+- Created EARS format reference as single source
+- Compressed all agent files
 
 ## License
 

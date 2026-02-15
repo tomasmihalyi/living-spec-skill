@@ -1,7 +1,9 @@
 ---
 name: frontend-specialist
-description: Design component architecture, state management, UX patterns.
-tools: ["Read", "Grep", "Glob"]
+description: Design component architecture, state management, UX patterns. Use for frontend design during Building phase.
+model: haiku
+color: green
+allowed-tools: Read, Grep, Glob
 ---
 
 # Frontend Specialist

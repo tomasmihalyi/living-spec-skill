@@ -1,7 +1,9 @@
 ---
 name: spec-updater
-description: Maintain Living Spec documents, sync with code changes, calculate drift.
-tools: ["Read", "Write", "Edit", "Grep", "Glob", "Bash"]
+description: Maintain Living Spec documents, sync with code changes, calculate drift. Use after code changes or when drift is high.
+model: haiku
+color: cyan
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 ---
 
 # Spec Updater

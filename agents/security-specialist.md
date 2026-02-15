@@ -1,7 +1,9 @@
 ---
 name: security-specialist
-description: Design auth flows, authorization, input validation, threat modeling.
-tools: ["Read", "Grep", "Glob"]
+description: Design auth flows, authorization, input validation, threat modeling. Use for security design during Building phase.
+model: sonnet
+color: green
+allowed-tools: Read, Grep, Glob
 ---
 
 # Security Specialist

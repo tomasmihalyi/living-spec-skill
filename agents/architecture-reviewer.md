@@ -1,7 +1,9 @@
 ---
 name: architecture-reviewer
-description: Analyze design patterns, identify constraints, document architecture decisions.
-tools: ["Read", "Grep", "Glob"]
+description: Analyze design patterns, identify constraints, document architecture decisions. Use for architecture review during Planning phase.
+model: sonnet
+color: blue
+allowed-tools: Read, Grep, Glob
 ---
 
 # Architecture Reviewer
