@@ -1,7 +1,9 @@
 ---
 name: comprehension-gate
-description: Verify developer understanding at phase transitions with targeted questions.
-tools: ["Read", "AskUserQuestion"]
+description: Verify developer understanding at phase transitions with targeted questions. Use before phase transitions.
+model: haiku
+color: yellow
+allowed-tools: Read, AskUserQuestion
 ---
 
 # Comprehension Gate

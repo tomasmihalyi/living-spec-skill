@@ -1,0 +1,12 @@
+{
+  "name": "living-spec-skill",
+  "version": "2.3.0",
+  "description": "Multi-agent orchestration for AI-maintainable specifications using AI-DLC principles",
+  "author": {
+    "name": "Tomas Mihalyi",
+    "url": "https://github.com/tomasmihalyi"
+  },
+  "repository": "https://github.com/tomasmihalyi/living-spec-skill",
+  "license": "MIT",
+  "keywords": ["specifications", "documentation", "multi-agent", "ears", "ai-dlc"]
+}

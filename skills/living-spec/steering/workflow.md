@@ -10,36 +10,38 @@
 
 Living Spec leverages specialized subagents for parallel analysis and domain expertise.
 
-### Available Agents (in `~/.claude/skills/agents/`)
+### Available Agents
+
+All agents are registered as plugin agents under `living-spec-skill:`.
 
 | Agent | Purpose | Phase |
 |-------|---------|-------|
-| `requirements-analyst` | Extract FR/NFR in EARS format | Planning |
-| `architecture-reviewer` | Analyze design patterns | Planning |
-| `risk-assessor` | Security, performance, debt | Planning |
-| `database-specialist` | Schema, queries, migrations | Building |
-| `api-specialist` | Endpoints, contracts, errors | Building |
-| `frontend-specialist` | Components, state, UX | Building |
-| `security-specialist` | Auth, validation, threats | Building |
-| `test-specialist` | Test strategy, coverage | Building |
-| `spec-critic` | Review alignment, find gaps | All phases |
-| `comprehension-gate` | Verify understanding | Transitions |
-| `spec-updater` | Maintain spec documents | After changes |
+| `living-spec-skill:requirements-analyst` | Extract FR/NFR in EARS format | Planning |
+| `living-spec-skill:architecture-reviewer` | Analyze design patterns | Planning |
+| `living-spec-skill:risk-assessor` | Security, performance, debt | Planning |
+| `living-spec-skill:database-specialist` | Schema, queries, migrations | Building |
+| `living-spec-skill:api-specialist` | Endpoints, contracts, errors | Building |
+| `living-spec-skill:frontend-specialist` | Components, state, UX | Building |
+| `living-spec-skill:security-specialist` | Auth, validation, threats | Building |
+| `living-spec-skill:test-specialist` | Test strategy, coverage | Building |
+| `living-spec-skill:spec-critic` | Review alignment, find gaps | All phases |
+| `living-spec-skill:comprehension-gate` | Verify understanding | Transitions |
+| `living-spec-skill:spec-updater` | Maintain spec documents | After changes |
 
 ### Spawning Agents
 
 Use the Task tool to spawn agents. Call multiple Task tools in a SINGLE message for parallel execution.
 
 **Required parameters:**
-- `subagent_type`: "general-purpose" (for all skill agents)
+- `subagent_type`: `"living-spec-skill:<agent-name>"` (plugin agent)
 - `description`: Short description (3-5 words), e.g., "Requirements analysis"
-- `prompt`: "Read ~/.claude/skills/agents/[agent-name].md and apply its instructions to [specific task]"
+- `prompt`: Task-specific instructions for the agent
 
 **Example - Parallel Planning Agents:**
 Send one message with three Task tool calls:
-1. Task: subagent_type=general-purpose, description="Requirements analysis", prompt="Read ~/.claude/skills/agents/requirements-analyst.md..."
-2. Task: subagent_type=general-purpose, description="Architecture review", prompt="Read ~/.claude/skills/agents/architecture-reviewer.md..."
-3. Task: subagent_type=general-purpose, description="Risk assessment", prompt="Read ~/.claude/skills/agents/risk-assessor.md..."
+1. Task: subagent_type=living-spec-skill:requirements-analyst, description="Requirements analysis", prompt="Analyze this project and extract requirements..."
+2. Task: subagent_type=living-spec-skill:architecture-reviewer, description="Architecture review", prompt="Analyze this project's architecture..."
+3. Task: subagent_type=living-spec-skill:risk-assessor, description="Risk assessment", prompt="Assess risks for this project..."
 
 ## First-Time Flow
 

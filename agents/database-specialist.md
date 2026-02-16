@@ -1,7 +1,9 @@
 ---
 name: database-specialist
-description: Design schemas, optimize queries, plan migrations.
-tools: ["Read", "Grep", "Glob"]
+description: Design schemas, optimize queries, plan migrations. Use for data model design during Building phase.
+model: haiku
+color: green
+allowed-tools: Read, Grep, Glob
 ---
 
 # Database Specialist

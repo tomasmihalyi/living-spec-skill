@@ -1,7 +1,9 @@
 ---
 name: spec-critic
-description: Review implementation against spec, identify gaps, generate comprehension questions.
-tools: ["Read", "Grep", "Glob"]
+description: Review implementation against spec, identify gaps, generate comprehension questions. Use for quality gates at any phase.
+model: haiku
+color: yellow
+allowed-tools: Read, Grep, Glob
 ---
 
 # Spec Critic

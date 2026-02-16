@@ -1,7 +1,9 @@
 ---
 name: risk-assessor
-description: Identify security vulnerabilities, performance issues, and technical debt.
-tools: ["Read", "Grep", "Glob"]
+description: Identify security vulnerabilities, performance issues, and technical debt. Use for risk assessment during Planning phase.
+model: sonnet
+color: blue
+allowed-tools: Read, Grep, Glob
 ---
 
 # Risk Assessor

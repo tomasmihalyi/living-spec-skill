@@ -1,7 +1,9 @@
 ---
 name: test-specialist
-description: Design test strategies, coverage analysis, requirement traceability.
-tools: ["Read", "Grep", "Glob", "Bash"]
+description: Design test strategies, coverage analysis, requirement traceability. Use for test planning during Building phase.
+model: haiku
+color: green
+allowed-tools: Read, Grep, Glob, Bash
 ---
 
 # Test Specialist
